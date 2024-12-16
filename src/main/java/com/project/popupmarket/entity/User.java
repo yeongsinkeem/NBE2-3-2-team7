@@ -56,5 +56,4 @@ public class User {
         this.registeredAt = LocalDateTime.now(); // 기본값 설정
         this.role = Role.USER;
     }
-
 }
