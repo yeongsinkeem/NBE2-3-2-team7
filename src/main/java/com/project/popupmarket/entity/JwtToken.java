@@ -15,4 +15,5 @@ public class JwtToken {
     private String token;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
+
 }
