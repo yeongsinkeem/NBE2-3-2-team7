@@ -28,6 +28,7 @@ public class PopupStoreImageListId implements Serializable {
     @Column(name = "image", nullable = false)
     private String image;
 
+    // 팝업스토어 번호와 이미지 값이 같으면 두 객체 동일하다고 판단
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,6 +38,7 @@ public class PopupStoreImageListId implements Serializable {
                 Objects.equals(this.popupStoreSeq, entity.popupStoreSeq);
     }
 
+    // 객체의 해시코드 생성
     @Override
     public int hashCode() {
         return Objects.hash(image, popupStoreSeq);
