@@ -1,19 +1,32 @@
 package com.project.popupmarket.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
+@Table(name = "jwtToken")
 public class JwtToken {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long seq;
-    private String token;
-    private LocalDateTime createdAt;
-    private LocalDateTime expiresAt;
+    @EmbeddedId
+    private JwtTokenId id;
+
+    @MapsId("userSeq")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_seq", nullable = false)
+    private User userSeq;
+
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "created_at")
+    private Instant createdAt;
+
+    @NotNull
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
 
 }
