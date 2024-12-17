@@ -1,68 +1,87 @@
 package com.project.popupmarket.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-@Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@Table(name = "RentalPlace")
+@Entity
+@Table(name = "rentalPlace")
 public class RentalPlace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long seq;
+    @Column(name = "seq", nullable = false)
+    private Long id;
 
-    @Column(nullable = false)
-    private String email; // 이메일
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rental_user_seq")
+    private User rentalUserSeq;
 
-    @Column(nullable = false)
-    private String thumbnail; // 대표 이미지
+    @Size(max = 255)
+    @Column(name = "thumbnail")
+    private String thumbnail;
 
-    @Column(nullable = false)
-    private int area; // 면적
+    @Size(max = 255)
+    @Column(name = "area")
+    private String area;
 
-    @Column(nullable = false)
-    private long price; // 가격
+    @Column(name = "price", precision = 10)
+    private BigDecimal price;
 
-    @Column(nullable = false)
-    private String zipcode; // 우편번호
+    @Size(max = 255)
+    @Column(name = "address")
+    private String address;
 
-    @Column(nullable = false)
-    private String address; // 주소
+    @Size(max = 255)
+    @Column(name = "addr_detail")
+    private String addrDetail;
 
-    private String addressDetail; // 상세주소
+    @Lob
+    @Column(name = "description")
+    private String description;
 
-    private String description; // 임대지 설명
+    @Size(max = 255)
+    @Column(name = "infra")
+    private String infra;
 
-    @Column(nullable = false)
-    private String name; // 임대지 이름
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
 
-    @Column(nullable = false)
-    private int capacity; // 수용인원
+    @Size(max = 255)
+    @Column(name = "capacity")
+    private String capacity;
 
-    @Column(nullable = false)
-    private String infra; // 인프라
+    @Size(max = 255)
+    @Column(name = "nearby_age_group")
+    private String nearbyAgeGroup;
 
-    private AgeGroup age; // 주변 연령대 확인 (ENUM?)
+    @NotNull
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "registered_at", nullable = false)
+    private Instant registeredAt;
 
-    @Column(nullable = false)
-    private LocalDateTime registeredAt = LocalDateTime.now(); // 등록일자
+    @NotNull
+    @Lob
+    @Column(name = "status", nullable = false)
+    private String status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RentalStatus state = RentalStatus.available; // 임대 상태
+    @OneToMany(mappedBy = "rentalPlaceSeq", cascade = CascadeType.ALL)
+    private Set<PlaceRequest> popupStores = new LinkedHashSet<>();
 
-    public enum AgeGroup {
-        teans, twenties, thirties,
-    }
+    @OneToMany(mappedBy = "rentalPlaceSeq")
+    private Set<Receipt> receipts = new LinkedHashSet<>();
 
-    public enum RentalStatus {
-        available,
-        notavailable
-    }
+    @OneToMany(mappedBy = "rentalPlaceSeq")
+    private Set<RentalPlaceImageList> rentalPlaceImageLists = new LinkedHashSet<>();
+
 }
