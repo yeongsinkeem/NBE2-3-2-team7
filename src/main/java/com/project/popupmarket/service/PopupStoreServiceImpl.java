@@ -15,6 +15,7 @@ public class PopupStoreServiceImpl {
     @Autowired
     private PopupStoreJpaRepository popupStoreJpaRepository;
 
+    // 데이터 삽입
     public int insert(PopupStoreTO to) {
         int flag = 0;
 
@@ -26,6 +27,7 @@ public class PopupStoreServiceImpl {
         return flag;
     }
 
+    // 모든 팝업 리스트 출력
     public List<PopupStoreTO> findAll() {
         List<PopupStore> popupStores = popupStoreJpaRepository.findAll();
 
