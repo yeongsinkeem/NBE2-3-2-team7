@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
@@ -18,8 +19,10 @@ public class PopupStore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seq", nullable = false)
+    // auto_increment + PK
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY) // 팝업 기획자(임차인) - 팝업 : 다대일
     @JoinColumn(name = "popup_user_seq") // 외래키 컬럼
     private User popupUserSeq;
