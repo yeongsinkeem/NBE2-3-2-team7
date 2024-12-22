@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,7 +29,7 @@ public class PopupStoreController {
     public ResponseEntity<String> createPopup(@RequestBody PopupStoreTO popupStore) {
         PopupStoreTO to = new PopupStoreTO();
 
-        long popupSeq = popupStore.getSeq();
+        // long popupSeq = popupStore.getSeq();
         // to.setPopup_user_seq(popupStore.getPopup_user_seq());
         to.setThumbnail(popupStore.getThumbnail());
         to.setType(popupStore.getType());
@@ -66,7 +65,7 @@ public class PopupStoreController {
 
     // 2 - 2. Read : 번호에 해당하는 팝업
     // 특정 번호에 해당하는 팝업스토어 상세 정보
-    @GetMapping("/detail/popup/{seq}")
+    @GetMapping("/popup/detail/{seq}")
     @Operation(summary = "개별 팝업 조회" )
     public PopupStoreTO getPopupBySeq(@PathVariable Long seq) {
         PopupStoreTO to = popupStoreServiceImpl.findBySeq(seq);
@@ -83,45 +82,16 @@ public class PopupStoreController {
     // @GetMapping("/mypage/popup")
 
     // 3. Update : 번호에 해당하는 팝업 수정
-    @PostMapping("/mypage/popup/edit/{seq}")
+    @PutMapping("/mypage/popup/edit/{seq}")
     @Operation(summary = "개별 팝업 수정")
-    public String updatePopup(@PathVariable long seq, @RequestBody PopupStoreTO popupStore) {
-            PopupStoreTO beforePopup = PopupStoreServiceImpl.findBySeq(seq);
-            if (beforePopup == null) {
-                return "<h3>Member not found</h3>";
-            }
+    public ResponseEntity<String> updatePopup(@PathVariable Long seq, @RequestBody PopupStoreTO popupStore) {
+        int result = popupStoreServiceImpl.update(seq, popupStore);
 
-            if (popupStore.getThumbnail() != null) {
-                beforePopup.setThumbnail(popupStore.getThumbnail());
-            }
-            if (popupStore.getType() != null) {
-                beforePopup.setType(popupStore.getType());
-            }
-            if (popupStore.getTargetAgeGroup() != null) {
-                beforePopup.setTargetAgeGroup(popupStore.getTargetAgeGroup());
-            }
-            if (popupStore.getTitle() != null) {
-                beforePopup.setTitle(popupStore.getTitle());
-            }
-            if (popupStore.getDescription() != null) {
-                beforePopup.setDescription(popupStore.getDescription());
-            }
-            if (popupStore.getTargetLocation() != null) {
-                beforePopup.setTargetLocation(popupStore.getTargetLocation());
-            }
-            if (popupStore.getStartDate() != null) {
-                beforePopup.setStartDate(popupStore.getStartDate());
-            }
-            if (popupStore.getEndDate() != null) {
-                beforePopup.setEndDate(popupStore.getEndDate());
-            }
-            if (popupStore.getWishArea() != null) {
-                beforePopup.setWishArea(popupStore.getWishArea());
-            }
-
-            PopupStoreServiceImpl.update(beforePopup);
-        System.out.println("update !!");
-            return "<h3>Update Success</h3>";
+        if (result > 0) {
+            return ResponseEntity.ok("PopupStore updated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("PopupStore not found");
+        }
     }
 
     // 4. Delete

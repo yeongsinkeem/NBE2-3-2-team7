@@ -65,8 +65,7 @@ public class PopupStore {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    // 아래부터는 외래키 관련 설정
-
+    // [ 외래키 관련 설정 ]
     // 1. 하나의 PopupStore는 여러 개의 PlaceRequest 가질 수 있음
     // PlaceRequest ) "popupStoreSeq"가 외래 키 역할.
     @OneToMany(mappedBy = "popupStoreSeq")

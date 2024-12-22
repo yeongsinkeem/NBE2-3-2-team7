@@ -14,6 +14,8 @@ import java.util.Objects;
 
 @Getter
 @Setter
+// Entity 관련 애너테이션
+// Embeddable : 내장될 클래스에 사용
 @Embeddable
 public class PopupStoreImageListId implements Serializable {
     @Serial

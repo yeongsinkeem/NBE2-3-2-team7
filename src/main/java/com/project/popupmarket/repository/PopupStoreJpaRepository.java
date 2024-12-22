@@ -2,6 +2,7 @@ package com.project.popupmarket.repository;
 
 import com.project.popupmarket.entity.PopupStore;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,5 +31,29 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             @Param("endDate") LocalDate endDate
     );
 
+    @Modifying
+    @Query("UPDATE PopupStore p " +
+            "SET p.thumbnail = COALESCE(:thumbnail, p.thumbnail), " +
+            "p.type = COALESCE(:type, p.type), " +
+            "p.targetAgeGroup = COALESCE(:targetAgeGroup, p.targetAgeGroup), " +
+            "p.targetLocation = COALESCE(:targetLocation, p.targetLocation), " +
+            "p.title = COALESCE(:title, p.title), " +
+            "p.wishArea = COALESCE(:wishArea, p.wishArea), " +
+            "p.description = COALESCE(:description, p.description), " +
+            "p.startDate = COALESCE(:startDate, p.startDate), " +
+            "p.endDate = COALESCE(:endDate, p.endDate) " +
+            "WHERE p.id = :id")
+    int updatePopupStore(
+            @Param("id") Long id,
+            @Param("thumbnail") String thumbnail,
+            @Param("type") String type,
+            @Param("targetAgeGroup") String targetAgeGroup,
+            @Param("targetLocation") String targetLocation,
+            @Param("title") String title,
+            @Param("wishArea") Integer wishArea,
+            @Param("description") String description,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 
 }
