@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
@@ -18,10 +19,12 @@ public class PopupStore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seq", nullable = false)
+    // auto_increment + PK
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "popup_user_seq")
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY) // 팝업 기획자(임차인) - 팝업 : 다대일
+    @JoinColumn(name = "popup_user_seq") // 외래키 컬럼
     private User popupUserSeq;
 
     @Size(max = 255)
@@ -49,6 +52,11 @@ public class PopupStore {
     @Column(name = "target_location")
     private String targetLocation;
 
+    // 팝업스토어 희망 면적 추가
+    // Null 값 허용
+    @Column(name = "wish_area")
+    private Integer wishArea;
+
     @NotNull
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -57,9 +65,14 @@ public class PopupStore {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    // [ 외래키 관련 설정 ]
+    // 1. 하나의 PopupStore는 여러 개의 PlaceRequest 가질 수 있음
+    // PlaceRequest ) "popupStoreSeq"가 외래 키 역할.
     @OneToMany(mappedBy = "popupStoreSeq")
     private Set<PlaceRequest> rentalPlaces = new LinkedHashSet<>();
 
+    // 2. 하나의 PopupStore는 여러 개의 PopupStoreImageList 가질 수 있음
+    // PopupStoreImageList ) "popupStoreSeq"가 외래 키 역할
     @OneToMany(mappedBy = "popupStoreSeq")
     private Set<PopupStoreImageList> popupStoreImageLists = new LinkedHashSet<>();
 
