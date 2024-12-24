@@ -1,32 +1,34 @@
 package com.project.popupmarket.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 @Entity
-@Table(name = "jwtToken")
 public class JwtToken {
-    @EmbeddedId
-    private JwtTokenId id;
 
-    @MapsId("userSeq")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_seq", nullable = false)
-    private User userSeq;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false)
+    private Long id;
 
-    @ColumnDefault("current_timestamp()")
-    @Column(name = "created_at")
-    private Instant createdAt;
+    @Column(name = "user_id", nullable = false, unique = true)
+    private Long userId;
 
-    @NotNull
-    @Column(name = "expires_at", nullable = false)
-    private Instant expiresAt;
+    @Column(name = "jwt_token", nullable = false)
+    private String jwtToken;
 
+    public JwtToken(Long userId, String refreshToken) {
+        this.userId = userId;
+        this.jwtToken = refreshToken;
+    }
+
+    public JwtToken update(String newRefreshToken) {
+        this.jwtToken = newRefreshToken;
+
+        return this;
+    }
 }

@@ -35,3 +35,22 @@ out/
 
 ### VS Code ###
 .vscode/
+/src/main/java/com/project/popupmarket/controller/ViewController.java
+
+
+### OAuth2 ###
+application-oauth.properties
+application-oauth.yml
+src/main/resources/application-oauth.properties
+src/main/resources/application-oauth.yml
+
+### Security Keys ###
+*.pem
+*.key
+*.p12
+*.jks
+
+# Properties containing sensitive information
+**/resources/oauth2.properties
+**/resources/security.properties
+**/resources/application-secret.properties
