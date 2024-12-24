@@ -1,6 +1,8 @@
 package com.project.popupmarket.controller;
 
+import com.project.popupmarket.dto.userDto.UserRegisterDto;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -87,12 +89,14 @@ public class WebController {
     }
 
     @GetMapping("register")
-    public String register() {
+    public String showRegisterForm(Model model) {
+        model.addAttribute("userRegisterDto", new UserRegisterDto());
         return "register";
     }
 
+    // 로그인 페이지 보여주기
     @GetMapping("login")
-    public String login() {
+    public String showLoginForm() {
         return "login";
     }
 }
