@@ -5,6 +5,7 @@ import com.project.popupmarket.entity.RentalPlace;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -40,6 +41,10 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
             @Param("maxPrice") BigDecimal maxPrice,
             Pageable pageable
     );
+    @Modifying
+    @Query("DELETE FROM RentalPlace r WHERE r.id = :id")
+    void deleteRentalPlaceById(@Param("id") Long id);
+
 
 
 }
