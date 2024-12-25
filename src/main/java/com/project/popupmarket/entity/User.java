@@ -62,9 +62,6 @@ public class User {
     @OneToMany(mappedBy = "popupUserSeq")
     private Set<PopupStore> popupStores = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "popupUserSeq")
-    private Set<Receipt> receipts = new LinkedHashSet<>();
-
     @OneToMany(mappedBy = "rentalUserSeq")
     private Set<RentalPlace> rentalPlaces = new LinkedHashSet<>();
 

@@ -20,7 +20,7 @@
 	<!-- Common JS -->
 	<script src="/scripts/common.js" defer></script>
 	<!-- Place Detail JS -->
-	<script src="/scripts/place.detail.js"></script>
+	<script src="/scripts/place.detail.js" defer></script>
 	<style>
 		.noUi-horizontal .noUi-handle {
 			width: 24px;
@@ -127,12 +127,12 @@
 									</div>
 									<div class="flex flex-col">
 										<span class="font-bold text-sm">총 금액</span>
-										<span class="font-bold text-lg">1,000,000원</span>
+										<span id="total-price" class="font-bold text-lg"></span>
 									</div>
 								</div>
-								<a href="/payment" class="block text-center w-full bg-[#3FB8AF] text-white py-2 rounded-md mt-2 hover:bg-[#2c817c] transition-colors">
+								<button onclick="reserve()" class="block text-center w-full bg-[#3FB8AF] text-white py-2 rounded-md mt-2 hover:bg-[#2c817c] transition-colors">
 										예약하기
-								</a>
+								</button>
 							</div>
 						</div>
 					</div>

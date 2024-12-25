@@ -86,6 +86,16 @@ public class WebController {
         return "payment";
     }
 
+    @GetMapping("payment/success")
+    public String paymentSuccess() {
+        return "payment_success";
+    }
+
+    @GetMapping("payment/fail")
+    public String paymentFail() {
+        return "payment_fail";
+    }
+
     @GetMapping("register")
     public String register() {
         return "register";
