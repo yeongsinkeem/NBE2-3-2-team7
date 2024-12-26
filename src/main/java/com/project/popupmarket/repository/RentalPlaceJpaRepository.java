@@ -41,6 +41,10 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
             @Param("maxPrice") BigDecimal maxPrice,
             Pageable pageable
     );
+
+    @Query("SELECT r.rentalUserSeq.id FROM RentalPlace r WHERE r.id = :id")
+    Long findUserSeqById(@Param("id") Long id);
+
     @Modifying
     @Query("DELETE FROM RentalPlace r WHERE r.id = :id")
     void deleteRentalPlaceById(@Param("id") Long id);

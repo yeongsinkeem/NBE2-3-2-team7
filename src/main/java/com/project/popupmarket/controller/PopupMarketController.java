@@ -155,7 +155,7 @@ public class PopupMarketController {
     public ResponseEntity<Void> deleteRentalPlacePage(
             @PathVariable Long id
     ) {
-        rentalPlaceService.deleteRentalPlaceImageById(id);
+//        rentalPlaceService.deleteRentalPlaceImageById(id);
         rentalPlaceService.deleteRentalPlaceById(id);
 
         return ResponseEntity.noContent().build(); // 상태 코드 204 반환

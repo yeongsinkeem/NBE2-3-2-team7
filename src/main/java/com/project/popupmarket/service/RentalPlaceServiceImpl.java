@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -297,6 +298,12 @@ public class RentalPlaceServiceImpl {
     @Transactional
     public int deleteRentalPlaceById(Long id){
         int flag=0;
+        Long userSeq = rentalPlaceJpaRepository.findUserSeqById(id);
+
+        deleteThumbnailFile(id, userSeq);
+        deleteImageFiles(id, userSeq);
+
+        rentalPlaceImageListJpaRepository.deleteRentalPlaceImageBySeq(id);
         rentalPlaceJpaRepository.deleteRentalPlaceById(id);
 
         return flag;
@@ -319,6 +326,52 @@ public class RentalPlaceServiceImpl {
             Files.write(filePath, file.getBytes());
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 실패", e);
+        }
+    }
+
+    private void deleteThumbnailFile(Long id, Long userSeq) {
+        try {
+            String basePath = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+            String thumbnailPath = String.format(basePath + "place_thumbnail/place_%d_%d_thumbnail.png", id, userSeq);
+            File thumbnailFile = new File(thumbnailPath);
+
+            if (thumbnailFile.exists()) {
+                if (thumbnailFile.delete()) {
+                    System.out.println("썸네일 파일 삭제 성공: " + thumbnailPath);
+                } else {
+                    System.err.println("썸네일 파일 삭제 실패: " + thumbnailPath);
+                }
+            } else {
+                System.out.println("삭제할 썸네일 파일이 존재하지 않음: " + thumbnailPath);
+            }
+        } catch (Exception e) {
+            System.err.println("썸네일 파일 삭제 중 오류 발생: " + e.getMessage());
+        }
+    }
+    private void deleteImageFiles(Long id, Long userSeq) {
+        try {
+            String basePath = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+            String imagePathPattern = String.format(basePath + "place_detail/place_%d_%d_images_", id, userSeq);
+
+            int index = 1;
+            while (true) {
+                String imagePath = String.format(imagePathPattern + "%d.png", index);
+                File imageFile = new File(imagePath);
+
+                if (imageFile.exists()) {
+                    if (imageFile.delete()) {
+                        System.out.println("상세 이미지 파일 삭제 성공: " + imagePath);
+                    } else {
+                        System.err.println("상세 이미지 파일 삭제 실패: " + imagePath);
+                    }
+                } else {
+                    System.out.println("삭제할 이미지 파일이 더 이상 존재하지 않음 (index: " + index + ")");
+                    break;
+                }
+                index++;
+            }
+        } catch (Exception e) {
+            System.err.println("상세 이미지 파일 삭제 중 오류 발생: " + e.getMessage());
         }
     }
 
