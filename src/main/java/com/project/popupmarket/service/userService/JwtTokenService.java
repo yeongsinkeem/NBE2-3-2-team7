@@ -1,6 +1,5 @@
 package com.project.popupmarket.service.userService;
 
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.project.popupmarket.entity.JwtToken;
 import com.project.popupmarket.repository.JwtTokenRepository;
 import lombok.RequiredArgsConstructor;

@@ -21,13 +21,13 @@ public class JwtToken {
     @Column(name = "jwt_token", nullable = false)
     private String jwtToken;
 
-    public JwtToken(Long userId, String refreshToken) {
+    public JwtToken(Long userId, String jwtToken) {
         this.userId = userId;
-        this.jwtToken = refreshToken;
+        this.jwtToken = jwtToken;
     }
 
-    public JwtToken update(String newRefreshToken) {
-        this.jwtToken = newRefreshToken;
+    public JwtToken update(String newJwtToken) {
+        this.jwtToken = newJwtToken;
 
         return this;
     }

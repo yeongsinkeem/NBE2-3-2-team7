@@ -1,58 +1,80 @@
 package com.project.popupmarket.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 @Entity
 @Table(name = "users")
 @Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false)
     private Long id;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(length = 255, nullable = false)
+    @Column(name = "password")
     private String password;
 
-    @Column(length = 255, nullable = false)
+    @Column(name = "name", unique = true)
     private String name;
 
-    @Column(length = 255)
-    private String social;
+//    @Column(name = "social")
+//    private String social;
 
-    @Column(length = 255)
+    @Column(name = "brand")
     private String brand;
 
-    @Column(length = 20)
+    @Column(name = "tel")
     private String tel;
 
-    @Column(length = 255)
-    private String profile_image;
+    @Column(name = "profile_image")
+    private String profileImage;
 
     @Column(nullable = false)
-    private LocalDateTime registered_at;
+    private LocalDateTime registeredAt;
+
+    @ElementCollection
+    @CollectionTable(name = "user_attributes", joinColumns = @JoinColumn(name = "user_id"))
+    @MapKeyColumn(name = "attribute_key")
+    @Column(name = "attribute_value")
+    private Map<String, String> attributes;
 
     @PrePersist
     protected void onCreate() {
-        registered_at = LocalDateTime.now();
+        registeredAt = LocalDateTime.now();
+    }
+
+    @Builder
+    public User(String email, String password, String name, String social, String brand, String tel, String profileImage, Map<String, String> attributes) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+//        this.social = social;
+        this.brand = brand;
+        this.tel = tel;
+        this.profileImage = profileImage;
+        this.attributes = attributes;
+    }
+
+    public User update(String nickname) {
+        this.name = nickname;
+        return this;
     }
 
     @Override
