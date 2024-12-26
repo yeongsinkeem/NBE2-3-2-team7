@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RespTO {
+public class RespObjectTO<T> {
     private int status;
     private String message;
+    private T data;
 }

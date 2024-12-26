@@ -1,7 +1,7 @@
 package com.project.popupmarket.service;
 
 import com.project.popupmarket.dto.payment.*;
-import com.project.popupmarket.dto.response.RespTO;
+import com.project.popupmarket.dto.response.RespObjectTO;
 import com.project.popupmarket.entity.*;
 import com.project.popupmarket.repository.ReceiptRepository;
 import com.project.popupmarket.repository.StagingPaymentRepository;
@@ -51,7 +51,7 @@ public class PaymentService {
                 ).fetch().isEmpty();
     }
 
-    public RespTO<ReservationInfoTO> getPaymentInfo(ReservationTO reservation) {
+    public RespObjectTO<ReservationInfoTO> getPaymentInfo(ReservationTO reservation) {
         boolean flag = receiptReservationDateCheck(reservation);
 
         ReservationInfoTO reservationInfoTO = new ReservationInfoTO();
@@ -69,10 +69,10 @@ public class PaymentService {
             reservationInfoTO.setAddress("인천광역시 연수구 송도문화로 12");
             reservationInfoTO.setAddrDetail("돌돌 아파트 202동 303호");
 
-            return new RespTO<>(200, "예약 및 결제 가능", reservationInfoTO);
+            return new RespObjectTO<>(200, "예약 및 결제 가능", reservationInfoTO);
         } else {
             // 데이터 조회 != null -> 메세지 반환, 이미 예약된 날짜입니다.
-            return new RespTO<>(400, "이미 예약된 날짜입니다.", null);
+            return new RespObjectTO<>(400, "이미 예약된 날짜입니다.", null);
         }
     }
 
@@ -129,7 +129,7 @@ public class PaymentService {
         return statusCode;
     }
 
-    public RespTO<List<ReceiptInfoTO>> getReceipts(Long userId) {
+    public RespObjectTO<List<ReceiptInfoTO>> getReceipts(Long userId) {
         ModelMapper modelMapper = new ModelMapper();
 
         QReceipt qReceipt = QReceipt.receipt;
@@ -167,7 +167,7 @@ public class PaymentService {
                     receiptInfoList.add(receiptInfoTO);
                 });
 
-        return new RespTO<>(200, "success", receiptInfoList);
+        return new RespObjectTO<>(200, "success", receiptInfoList);
     }
 
     @Transactional
