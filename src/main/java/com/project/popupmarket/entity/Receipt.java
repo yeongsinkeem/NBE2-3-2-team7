@@ -49,11 +49,6 @@ public class Receipt {
     @Column(name = "reserved_at", nullable = false, updatable = false)
     private LocalDateTime reservedAt = LocalDateTime.now();
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status;
-
     @Getter
     public enum ReservationStatus {
         COMPLETED("결제 완료"),
@@ -65,10 +60,5 @@ public class Receipt {
         ReservationStatus(String desc) {
             this.desc = desc;
         }
-    }
-
-    public enum Status {
-        ACTIVE,
-        DISABLED
     }
 }

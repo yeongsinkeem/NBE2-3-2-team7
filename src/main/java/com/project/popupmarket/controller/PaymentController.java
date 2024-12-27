@@ -3,7 +3,7 @@ package com.project.popupmarket.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.popupmarket.dto.payment.*;
-import com.project.popupmarket.dto.response.RespObjectTO;
+import com.project.popupmarket.dto.Resp;
 import com.project.popupmarket.service.PaymentService;
 import com.project.popupmarket.service.TossRequestService;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class PaymentController {
     }
 
     @GetMapping("/payment")
-    public ResponseEntity<RespObjectTO<ReservationInfoTO>> reservationInfo(
+    public ResponseEntity<ReservationInfoTO> reservationInfo(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestParam Long seq,
             @RequestParam LocalDate start,
@@ -49,17 +49,17 @@ public class PaymentController {
         reservation.setStartDate(start);
         reservation.setEndDate(end);
 
-        RespObjectTO<ReservationInfoTO> resp = paymentService.getPaymentInfo(reservation);
+        ReservationInfoTO resp = paymentService.getPaymentInfo(reservation);
 
-        if (resp.getStatus() == 200) {
+        if (resp != null) {
             return ResponseEntity.ok(resp);
         } else {
-            return ResponseEntity.status(resp.getStatus()).body(resp);
+            return ResponseEntity.notFound().build();
         }
     }
 
     @PostMapping("/payment")
-    public ResponseEntity<RespObjectTO<Object>> payment(
+    public ResponseEntity<Resp> payment(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody ReceiptTO receipt
     ) {
@@ -67,17 +67,17 @@ public class PaymentController {
 //        reservation.setUserSeq(userId);
         receipt.setPopupUserSeq(1L);
 
-        int code = paymentService.insertStagingPayment(receipt);
+        boolean flag = paymentService.insertStagingPayment(receipt);
 
-        if (code == 200) {
-            return ResponseEntity.ok(new RespObjectTO<>(code, "success", null));
+        if (flag) {
+            return ResponseEntity.ok(new Resp(200, "success"));
         } else {
-            return ResponseEntity.status(code).body(new RespObjectTO<>(code, "fail", null));
+            return ResponseEntity.status(400).body(new Resp(400, "fail"));
         }
     }
 
     @PostMapping("/payment/success")
-    public ResponseEntity<RespObjectTO<?>> paymentSuccess(
+    public ResponseEntity<Resp> paymentSuccess(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody TossPaymentTO payment
     ) throws JsonProcessingException {
@@ -92,26 +92,25 @@ public class PaymentController {
             ReceiptTO receipt = objectMapper.readValue(response.body(), ReceiptTO.class);
             receipt.setPopupUserSeq(1L);
 
-            int success = paymentService.insertReceipt(receipt);
+            boolean flag = paymentService.insertReceipt(receipt);
 
-            if (success == 200) {
-                return ResponseEntity.ok(new RespObjectTO<>(success,"결제 성공", response.body()));
+            if (flag) {
+                return ResponseEntity.ok(new Resp(200,"결제 성공"));
             } else {
                 HttpResponse<String> canceled = tossRequestService.cancelPayment(payment.getPaymentKey(), "시스템 에러로 인한 결제 취소");
-                return ResponseEntity.status(success).body(new RespObjectTO<>(success, "결제 실패", canceled.body()));
+                return ResponseEntity.status(500).body(new Resp(500, "결제 실패"));
             }
         } else if (response != null){
-            // 실패 응답 반환
             return ResponseEntity.status(response.statusCode())
-                    .body(new RespObjectTO<>(response.statusCode(),"결제 실패", response.body()));
+                    .body(new Resp(response.statusCode(),"결제 실패"));
         } else {
             return ResponseEntity.status(500)
-                    .body(new RespObjectTO<>(500,"시스템 에러", null));
+                    .body(new Resp(500,"시스템 에러"));
         }
     }
 
     @DeleteMapping("/payment/fail")
-    public ResponseEntity<RespObjectTO<Object>> paymentFail(
+    public ResponseEntity<Resp> paymentFail(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody ReceiptTO receipt
     ) {
@@ -120,34 +119,64 @@ public class PaymentController {
 
         int statusCode = paymentService.deleteStagingPayment(receipt);
         if (statusCode == 200) {
-            return ResponseEntity.ok(new RespObjectTO<>(statusCode, "success", null));
+            return ResponseEntity.ok(new Resp(statusCode, "success"));
         } else {
-            return ResponseEntity.status(statusCode).body(new RespObjectTO<>(statusCode, "fail", null));
+            return ResponseEntity.status(statusCode).body(new Resp(statusCode, "fail"));
         }
     }
 
     @GetMapping("/receipt")
-    public ResponseEntity<RespObjectTO<List<ReceiptInfoTO>>> receipt(/*@RequestHeader("Authorization") String token*/) {
+    public ResponseEntity<List<ReceiptInfoTO>> receipt(/*@RequestHeader("Authorization") String token*/) {
         Long userId = 1L;
 
-        return ResponseEntity.ok(paymentService.getReceipts(userId));
+        List<ReceiptInfoTO> receipts = paymentService.getReceiptsByUserSeq(userId);
+
+        if (!receipts.isEmpty()) {
+            return ResponseEntity.ok(receipts);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/reservation/{rentalPlaceSeq}")
+    public ResponseEntity<List<ReceiptInfoTO>> reservation(@PathVariable Long rentalPlaceSeq) {
+        List<ReceiptInfoTO> receipts = paymentService.getReceiptsByPlaceSeq(rentalPlaceSeq);
+
+        if (!receipts.isEmpty()) {
+            return ResponseEntity.ok(receipts);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/receipt/{orderId}")
-    public ResponseEntity<RespObjectTO<Object>> receipt(
+    public ResponseEntity<Resp> receipt(
             /*@RequestHeader("Authorization") String token*/
             @PathVariable String orderId
     ) {
 //        Long userId = Long.parseLong(jwtTokenProvider.extractUserId(token.replace("Bearer ", "")));
         Long userId = 1L;
 
-
         TossPaymentTO payment = paymentService.changeReservationStatus(userId, orderId);
+
         if (payment != null) {
             HttpResponse<String> canceled = tossRequestService.cancelPayment(payment.getPaymentKey(), "시스템 에러로 인한 결제 취소");
-            return ResponseEntity.ok(new RespObjectTO<>(canceled.statusCode(), "success", canceled.body()));
+            return ResponseEntity.ok(new Resp(canceled.statusCode(), "success"));
         } else {
-            return ResponseEntity.status(500).body(new RespObjectTO<>(500, "fail", null));
+            return ResponseEntity.status(500).body(new Resp(500, "fail"));
+        }
+    }
+
+    // 임대지 기능과 병합시 삭제
+    @GetMapping("/test/date")
+    public ResponseEntity<List<RangeDateTO>> getRangeDates (@RequestParam Long placeSeq) {
+
+        List<RangeDateTO> rangeDates = paymentService.getRangeDates(placeSeq);
+
+        if (!rangeDates.isEmpty()) {
+            return ResponseEntity.ok(rangeDates);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }

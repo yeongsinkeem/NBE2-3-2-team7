@@ -14,7 +14,7 @@ function init() {
     })
         .then(resp => resp.json())
         .then(res => {
-            res.data.forEach((item) => {
+            res.forEach((item) => {
                 renderReceipts(item)
             })
             receipts.innerHTML = result;

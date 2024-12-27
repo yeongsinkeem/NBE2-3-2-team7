@@ -14,6 +14,7 @@ public class ReceiptInfoTO {
     private String orderId;
     private String reservationStatus;
     private String rentalPlaceName;
+    private String reservationUserName;
     private BigDecimal price;
     private BigDecimal totalAmount;
     private LocalDate startDate;

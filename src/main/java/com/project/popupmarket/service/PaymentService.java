@@ -1,7 +1,6 @@
 package com.project.popupmarket.service;
 
 import com.project.popupmarket.dto.payment.*;
-import com.project.popupmarket.dto.response.RespObjectTO;
 import com.project.popupmarket.entity.*;
 import com.project.popupmarket.repository.ReceiptRepository;
 import com.project.popupmarket.repository.StagingPaymentRepository;
@@ -16,11 +15,11 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.project.popupmarket.entity.Receipt.ReservationStatus;
-import static com.project.popupmarket.entity.Receipt.Status;
 
 @Service
 public class PaymentService {
@@ -51,67 +50,71 @@ public class PaymentService {
                 ).fetch().isEmpty();
     }
 
-    public RespObjectTO<ReservationInfoTO> getPaymentInfo(ReservationTO reservation) {
+    public ReservationInfoTO getPaymentInfo(ReservationTO reservation) {
         boolean flag = receiptReservationDateCheck(reservation);
 
-        ReservationInfoTO reservationInfoTO = new ReservationInfoTO();
-        if (flag) {
-            // 데이터 조회 == null -> 유저 및 임대지 조회
-            // 사용자 및 임대지 정보 조회 By 번호, 로직 추가 필요
-            // 임시 데이터로 진행
-            reservationInfoTO.setCustomerKey(UUID.randomUUID().toString());
-            reservationInfoTO.setPlaceName("임대지 이름1");
-            reservationInfoTO.setPrice(BigDecimal.valueOf(100000));
-            reservationInfoTO.setUserEmail("admin@test.com");
-            reservationInfoTO.setUserName("홍길동");
-            reservationInfoTO.setUserTel("010-1234-5678");
-            reservationInfoTO.setArea("12345");
-            reservationInfoTO.setAddress("인천광역시 연수구 송도문화로 12");
-            reservationInfoTO.setAddrDetail("돌돌 아파트 202동 303호");
+        QUser qUser = QUser.user;
+        QRentalPlace qRentalPlace = QRentalPlace.rentalPlace;
 
-            return new RespObjectTO<>(200, "예약 및 결제 가능", reservationInfoTO);
+        JPAQuery<User> userJPAQuery = new JPAQuery<>(em);
+        JPAQuery<RentalPlace> placeJPAQuery = new JPAQuery<>(em);
+
+        if (flag) {
+            ReservationInfoTO reservationInfoTO = new ReservationInfoTO();
+
+            User user = userJPAQuery.select(qUser).from(qUser)
+                    .where(qUser.id.eq(reservation.getUserSeq()))
+                    .fetchOne();
+
+            RentalPlace rentalPlace = placeJPAQuery.select(qRentalPlace).from(qRentalPlace)
+                    .where(qRentalPlace.id.eq(reservation.getRentalPlaceSeq()))
+                    .fetchOne();
+
+            reservationInfoTO.setCustomerKey(UUID.randomUUID().toString());
+            reservationInfoTO.setPlaceName(rentalPlace.getName());
+            reservationInfoTO.setPrice(rentalPlace.getPrice());
+            reservationInfoTO.setUserEmail(user.getEmail());
+            reservationInfoTO.setUserName(user.getName());
+            reservationInfoTO.setUserTel(user.getTel());
+            reservationInfoTO.setArea(rentalPlace.getArea());
+            reservationInfoTO.setAddress(rentalPlace.getAddress());
+            reservationInfoTO.setAddrDetail(rentalPlace.getAddrDetail());
+
+            return reservationInfoTO;
         } else {
-            // 데이터 조회 != null -> 메세지 반환, 이미 예약된 날짜입니다.
-            return new RespObjectTO<>(400, "이미 예약된 날짜입니다.", null);
+            return null;
         }
     }
 
     @Transactional
-    public int insertStagingPayment(ReceiptTO receipt) {
+    public boolean insertStagingPayment(ReceiptTO receipt) {
         // 유저랑 임대지 테이블 병합시 수정 필요.
 
         ModelMapper modelMapper = new ModelMapper();
         StagingPayment stagingPayment = modelMapper.map(receipt, StagingPayment.class);
-        System.out.println(receipt);
-        System.out.println(stagingPayment);
         StagingPayment saved = stagingPaymentRepository.save(stagingPayment);
 
-        return (saved.getOrderId() != null && saved.getOrderId().equals(stagingPayment.getOrderId())) ? 200 : 400;
+        return saved.getOrderId() != null && saved.getOrderId().equals(stagingPayment.getOrderId());
     }
 
     @Transactional
-    public int insertReceipt(ReceiptTO receipt) {
+    public boolean insertReceipt(ReceiptTO receipt) {
         // 유저랑 임대지 테이블 병합시 수정 필요.
 
-        ModelMapper modelMapper = new ModelMapper();
-        Receipt mapped = modelMapper.map(receipt, Receipt.class);
-
-        int statusCode = 400;
+        Receipt mapped = new ModelMapper().map(receipt, Receipt.class);
 
         Optional<StagingPayment> stagingPaymentOptional = stagingPaymentRepository.findById(receipt.getOrderId());
 
         if (stagingPaymentOptional.isPresent()){
-            StagingPayment stagingPayment = stagingPaymentOptional.get();
-            modelMapper.map(stagingPayment, mapped);
+            new ModelMapper().map(stagingPaymentOptional.get(), mapped);
             mapped.setReservationStatus(ReservationStatus.COMPLETED);
-            mapped.setStatus(Status.ACTIVE);
-            receiptRepository.save(mapped);
-            stagingPaymentRepository.delete(stagingPayment);
+            Receipt saved = receiptRepository.save(mapped);
+            stagingPaymentRepository.delete(stagingPaymentOptional.get());
 
-            statusCode = 200;
+            return saved.getOrderId() != null && saved.getOrderId().equals(receipt.getOrderId());
         }
 
-        return statusCode;
+        return false;
     }
 
     @Transactional
@@ -129,9 +132,57 @@ public class PaymentService {
         return statusCode;
     }
 
-    public RespObjectTO<List<ReceiptInfoTO>> getReceipts(Long userId) {
-        ModelMapper modelMapper = new ModelMapper();
+    public List<ReceiptInfoTO> getReceiptsByPlaceSeq(Long placeSeq) {
+        QReceipt qReceipt = QReceipt.receipt;
+        JPAQuery<Receipt> receiptJPAQuery = new JPAQuery<>(em);
 
+        QRentalPlace qRentalPlace = QRentalPlace.rentalPlace;
+        QUser qUser = QUser.user;
+
+        List<ReceiptInfoTO> receiptInfoList = new ArrayList<>();
+
+        receiptJPAQuery.select(qReceipt)
+                .from(qReceipt)
+                .where(qReceipt.rentalPlaceSeq.eq(placeSeq).and(
+                        qReceipt.reservationStatus.eq(ReservationStatus.COMPLETED)
+                ))
+                .orderBy(qReceipt.reservedAt.desc())
+                .fetch()
+                .forEach(item -> {
+                    ReceiptInfoTO receiptInfoTO = new ModelMapper().map(item, ReceiptInfoTO.class);
+
+                    JPAQuery<RentalPlace> rentalPlaceJPAQuery = new JPAQuery<>(em);
+                    JPAQuery<User> userJPAQuery = new JPAQuery<>(em);
+
+                    receiptInfoTO.setRentalPlaceName(
+                            rentalPlaceJPAQuery.select(qRentalPlace.name)
+                                    .from(qRentalPlace)
+                                    .where(qRentalPlace.id.eq(item.getRentalPlaceSeq()))
+                                    .fetchOne()
+                    );
+
+                    receiptInfoTO.setReservationUserName(
+                            userJPAQuery.select(qUser.name)
+                                    .from(qUser)
+                                    .where(qUser.id.eq(item.getPopupUserSeq()))
+                                    .fetchOne()
+                    );
+
+                    receiptInfoTO.setPrice(
+                            receiptInfoTO.getTotalAmount().divide(
+                                    BigDecimal.valueOf(
+                                            ChronoUnit.DAYS.between(receiptInfoTO.getStartDate(), receiptInfoTO.getEndDate()) + 1
+                                    ),0, RoundingMode.UP
+                            )
+                    );
+                    receiptInfoTO.setReservationStatus(item.getReservationStatus().getDesc());
+
+                    receiptInfoList.add(receiptInfoTO);
+                });
+        return receiptInfoList;
+    }
+
+    public List<ReceiptInfoTO> getReceiptsByUserSeq(Long userSeq) {
         QReceipt qReceipt = QReceipt.receipt;
         JPAQuery<Receipt> receiptJPAQuery = new JPAQuery<>(em);
 
@@ -141,12 +192,12 @@ public class PaymentService {
 
         receiptJPAQuery.select(qReceipt)
                 .from(qReceipt)
-                .where(qReceipt.popupUserSeq.eq(userId))
+                .where(qReceipt.popupUserSeq.eq(userSeq))
                 .orderBy(qReceipt.reservedAt.desc())
                 .fetch()
                 .forEach(item -> {
                     ReceiptInfoTO receiptInfoTO = new ReceiptInfoTO();
-                    modelMapper.map(item, receiptInfoTO);
+                    new ModelMapper().map(item, receiptInfoTO);
                     JPAQuery<RentalPlace> rentalPlaceJPAQuery = new JPAQuery<>(em);
 
                     receiptInfoTO.setRentalPlaceName(
@@ -167,7 +218,7 @@ public class PaymentService {
                     receiptInfoList.add(receiptInfoTO);
                 });
 
-        return new RespObjectTO<>(200, "success", receiptInfoList);
+        return receiptInfoList;
     }
 
     @Transactional
@@ -185,10 +236,30 @@ public class PaymentService {
                 .execute();
 
         if (receipt != null) {
-            ModelMapper modelMapper = new ModelMapper();
-
-            return modelMapper.map(receipt, TossPaymentTO.class);
+            return new ModelMapper().map(receipt, TossPaymentTO.class);
+        } else {
+            return null;
         }
-        return null;
+    }
+
+    public List<RangeDateTO> getRangeDates(Long rentalPlaceSeq) {
+        QReceipt qReceipt = QReceipt.receipt;
+        JPAQuery<Receipt> query = new JPAQuery<>(em);
+
+        List<RangeDateTO> rangeDates = new ArrayList<>();
+
+        query.select(qReceipt).from(qReceipt)
+                .where(qReceipt.rentalPlaceSeq.eq(rentalPlaceSeq).and(
+                        qReceipt.reservationStatus.eq(ReservationStatus.COMPLETED)
+                ).and(
+                        qReceipt.startDate.gt(LocalDate.now())
+                )).fetch().forEach(item -> {
+                    RangeDateTO rangeDateTO = new RangeDateTO();
+                    rangeDateTO.setStartDate(item.getStartDate());
+                    rangeDateTO.setEndDate(item.getEndDate());
+                    rangeDates.add(rangeDateTO);
+                });
+
+        return rangeDates;
     }
 }

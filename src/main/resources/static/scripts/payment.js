@@ -9,10 +9,10 @@ const orderId = generateRandomString();
 let infoVal = {};
 
 document.addEventListener('DOMContentLoaded' ,() => {
-	loadInfo();
+	init();
 });
 
-function loadInfo() {
+function init() {
 	checkParam()
 	fetch(`/api/payment?seq=${placeSeq}&start=${start}&end=${end}`,{
 		method: 'GET',
@@ -20,16 +20,19 @@ function loadInfo() {
 			'Authorization': `Bearer ${1}`
 		}
 	})
-		.then(resp => resp.json())
-		.then(res => {
-			if(res.status === 200) {
-				setData(res.data);
-			} else {
-				alert(res.message);
-				window.history.back();
+		.then(resp => {
+			if (!resp.ok) {
+				throw new Error(err.message || '이미 예약된 날짜입니다.');
 			}
+			return resp.json();
 		})
-		.catch(err => console.log(err));
+		.then(res => {
+				setData(res);
+		})
+		.catch(err => {
+			alert('[에러] : ', err.message);
+			window.history.back();
+		});
 }
 
 async function tossApi() {
