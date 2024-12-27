@@ -15,11 +15,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -169,22 +167,43 @@ public class PopupStoreServiceImpl {
 
      */
 
-
     // 4. Delete : 팝업리스트 삭제
     public int delete(long seq) {
         try {
             // ID를 기반으로 팝업 스토어 삭제
             popupStoreJpaRepository.deleteById(seq);
-            return 1; // 삭제 성공
-        } catch (EmptyResultDataAccessException e) {
-            // ID가 잘못되었을 경우
-            System.err.println("존재하지 않는 팝업으로 인해 삭제 실패: " + e.getMessage());
-            return 0;
+
+            // 이미지 경로 설정
+            String imgsPath = "src/main/resources/static/images/popup_detail";
+            String thPath = "src/main/resources/static/images/popup_thumbnail";
+
+            // 팝업 이미지 삭제
+            deleteFilesInDirectory(imgsPath, "popup_" + seq + "_images_*");
+
+            // 썸네일 이미지 삭제
+            deleteFilesInDirectory(thPath, "popup_" + seq + "_thumbnail*");
+
+            return 1;
         } catch (Exception e) {
             // 기타 예외 처리
             System.err.println("알 수 없는 오류로 삭제 실패: " + e.getMessage());
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    private void deleteFilesInDirectory(String dirPath, String pattern) throws IOException {
+        Path path = Paths.get(dirPath);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, pattern)) {
+            for (Path entry : stream) {
+                File file = entry.toFile();
+                if (file.exists() && file.isFile()) {
+                    Files.delete(entry);  // 파일 삭제
+                    System.out.println("파일 삭제 성공: " + entry.toString());
+                } else {
+                    System.out.println("파일이 존재하지 않거나 잘못된 경로입니다: " + entry.toString());
+                }
+            }
         }
     }
 }
