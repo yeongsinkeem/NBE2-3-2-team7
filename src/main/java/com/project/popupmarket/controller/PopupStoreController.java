@@ -113,12 +113,13 @@ public class PopupStoreController {
     }
 
     // 2 - 3. Read : 관리 중인 팝업 페이지 목록
+    // User 기능 추가시 구현 예정
     // thumbnail, seq(팝업 기획자의 팝업 데이터), type, title, 입점 요청 몇 회 받았는지
     // @GetMapping("/mypage/popup")
 
 
-    // 3. Update : 번호에 해당하는 팝업 수정
     /*
+    // 3. Update : 번호에 해당하는 팝업 수정
     @PutMapping("/mypage/popup/edit/{seq}")
     @Operation(summary = "개별 팝업 수정")
     public ResponseEntity<String> updatePopup(@PathVariable Long seq, @RequestBody PopupStoreTO popupStore) {
@@ -130,11 +131,8 @@ public class PopupStoreController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("PopupStore not found");
         }
     }
-     */
-
 
     // 3. Update : 번호에 해당하는 팝업 수정
-    /*
     @PutMapping("/mypage/popup/edit/{seq}")
     @Operation(summary = "개별 팝업 수정")
     public ResponseEntity<String> updatePopup(@PathVariable Long seq, @RequestBody PopupStoreImgDTO popupStoreImgDTO) {
@@ -146,9 +144,6 @@ public class PopupStoreController {
         UpdatePopupStoreTO resultTO = popupStoreServiceImpl.update2(seq, to, images);
 
         if (resultTO.getUpdateStatus() > 0) {
-
-     */
-            /*
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("message", "PopupStore updated succesfully.");
             responseBody.put("updatedImages", resultTO.getUpdatedImages());
@@ -159,8 +154,7 @@ public class PopupStoreController {
                     .body("PopupStore not found");
         }
     }
-
-             */
+    */
 
     // 4. Delete
     // 팝업 관리 페이지 "/mypage/popup/view?번호={팝업번호}" -> 해당 팝업에 대한 상세 정보와 삭제하기 버튼 같이 출력
