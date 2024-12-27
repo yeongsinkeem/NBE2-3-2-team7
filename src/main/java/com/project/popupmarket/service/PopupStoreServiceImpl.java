@@ -1,7 +1,11 @@
 package com.project.popupmarket.service;
 
 import com.project.popupmarket.dto.PopupStoreTO;
+import com.project.popupmarket.dto.UpdatePopupStoreTO;
 import com.project.popupmarket.entity.PopupStore;
+import com.project.popupmarket.entity.PopupStoreImageList;
+import com.project.popupmarket.entity.PopupStoreImageListId;
+import com.project.popupmarket.repository.PopupStoreImageJpaRepository;
 import com.project.popupmarket.repository.PopupStoreJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -9,40 +13,64 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class PopupStoreServiceImpl {
     @Autowired
     private PopupStoreJpaRepository popupStoreJpaRepository;
+    @Autowired
+    private PopupStoreImageJpaRepository popupStoreImageJpaRepository;
 
-    // 1. Create : 데이터 삽입
-    public int insert(PopupStoreTO to) {
-        // 받을 땐 TO로, 반환은 entity
+    @Transactional
+    public int insert(PopupStoreTO to, String thimg, List<String> imgs) {
         int flag = 0;
-
         try {
-            // 1. TO를 엔티티티로 매핑
+            // 1. to -> 엔티티 매핑
             ModelMapper modelMapper = new ModelMapper();
             PopupStore popupStore = modelMapper.map(to, PopupStore.class);
 
-            // 2. DB 저장
+            // 2. 팝업스토어 삽입
             popupStoreJpaRepository.save(popupStore);
 
-            // 3. 성공 시 flag 값은 1
-            flag = 1;
+            // 3. 팝업 TO 썸네일 파일 이름 설정
+            // ex ) "images/popup_thumbnail/~"
+            popupStore.setThumbnail(thimg);
+            System.out.println("팝업 썸네일 이름은 : " + popupStore.getThumbnail());
 
-        } catch (Exception e) {
-            System.out.println("데이터 삽입 중 에러 발생 : " + e.getMessage());
-            e.printStackTrace();
+            // 4. 각 이미지에 대해 PopupStoreImageList 엔티티 생성
+            List<PopupStoreImageList> imageLists = imgs.stream()
+                    .map(image -> new PopupStoreImageList(new PopupStoreImageListId(popupStore.getId(), "images/popup_detail/" + image)))
+                    .collect(Collectors.toList());
+
+            // 5. 상세 이미지 DB 삽입
+            popupStoreImageJpaRepository.saveAll(imageLists);
+
+        } catch ( Exception e) {
+            flag = 1;
+            System.out.println("Error : " + e.getMessage());
         }
-        return flag;
+        finally {
+            return flag;
+        }
     }
+
+    @Transactional
+    public void updateThumbnail(Long seq, String thimg) {
+        PopupStore popupStore = popupStoreJpaRepository.findById(seq).orElseThrow(() -> new RuntimeException("Popup store not found"));
+        popupStore.setThumbnail(thimg);
+        popupStoreJpaRepository.save(popupStore);
+    }
+
     // 2 - 1. Read : 특정 번호에 해당하는 팝업스토어 상세 정보
     public PopupStoreTO findBySeq(Long seq) {
         // Repository에서 해당 데이터 찾기
@@ -62,8 +90,8 @@ public class PopupStoreServiceImpl {
     // 2 - 2. Read : 조건에 해당하는 팝업 미리보기
     public List<PopupStoreTO> findByFilter(String targetLocation, String type, String targetAgeGroup, LocalDate startDate, LocalDate endDate) {
         List<PopupStore> popupStores = popupStoreJpaRepository.findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate);
-
         ModelMapper modelMapper = new ModelMapper();
+
         // 엔티티 -> TO로 매핑
         List<PopupStoreTO> lists = popupStores.stream()
                 .map(p -> modelMapper.map(p, PopupStoreTO.class))
@@ -78,7 +106,7 @@ public class PopupStoreServiceImpl {
         PopupStore existingPopup = popupStoreJpaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Popup not found"));
 
         // 값 설정 : 이때 변경 값만을 반영, 값이 null이면 기존 값 유지
-        String thumbnail = (popupStore.getThumbnail() != null) ? popupStore.getThumbnail() : existingPopup.getThumbnail();
+        // String thumbnail = (popupStore.getThumbnail() != null) ? popupStore.getThumbnail() : existingPopup.getThumbnail();
         String type = (popupStore.getType() != null) ? popupStore.getType() : existingPopup.getType();
         String targetAgeGroup = (popupStore.getTargetAgeGroup() != null) ? popupStore.getTargetAgeGroup() : existingPopup.getTargetAgeGroup();
         String targetLocation = (popupStore.getTargetLocation() != null) ? popupStore.getTargetLocation() : existingPopup.getTargetLocation();
@@ -88,11 +116,58 @@ public class PopupStoreServiceImpl {
         LocalDate startDate = (popupStore.getStartDate() != null) ? popupStore.getStartDate() : existingPopup.getStartDate();
         LocalDate endDate = (popupStore.getEndDate() != null) ? popupStore.getEndDate() : existingPopup.getEndDate();
 
+        // List<String> imgs = (popupStore.g)
+
         // 업데이트 쿼리 실행
         return popupStoreJpaRepository.updatePopupStore(
-                id, thumbnail, type, targetAgeGroup, targetLocation, title, wishArea, description, startDate, endDate
+                id, type, targetAgeGroup, targetLocation, title, wishArea, description, startDate, endDate
         );
     }
+
+    /*
+    @Transactional
+    public UpdatePopupStoreTO update2(Long id, PopupStoreTO popupStore, List<String> imgs) {
+        // 1. 기존 값 가져오기
+        PopupStore existingPopup = popupStoreJpaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Popup not found"));
+        List<String> existingImgs = popupStoreImageJpaRepository.findById_PopupStoreSeq(id);
+
+        // 2. 팝업스토어 수정 : 이때 변경 값만을 반영, 값이 null이면 기존 값 유지
+        // String thumbnail = (popupStore.getThumbnail() != null) ? popupStore.getThumbnail() : existingPopup.getThumbnail();
+        String type = (popupStore.getType() != null) ? popupStore.getType() : existingPopup.getType();
+        String targetAgeGroup = (popupStore.getTargetAgeGroup() != null) ? popupStore.getTargetAgeGroup() : existingPopup.getTargetAgeGroup();
+        String targetLocation = (popupStore.getTargetLocation() != null) ? popupStore.getTargetLocation() : existingPopup.getTargetLocation();
+        String title = (popupStore.getTitle() != null) ? popupStore.getTitle() : existingPopup.getTitle();
+        Integer wishArea = (popupStore.getWishArea() != null) ? popupStore.getWishArea() : existingPopup.getWishArea();
+        String description = (popupStore.getDescription() != null) ? popupStore.getDescription() : existingPopup.getDescription();
+        LocalDate startDate = (popupStore.getStartDate() != null) ? popupStore.getStartDate() : existingPopup.getStartDate();
+        LocalDate endDate = (popupStore.getEndDate() != null) ? popupStore.getEndDate() : existingPopup.getEndDate();
+
+        // 3. 팝업스토어 업데이트
+        int rowsUpdated = popupStoreJpaRepository.updatePopupStore(
+                id, type, targetAgeGroup, targetLocation, title, wishArea, description, startDate, endDate
+        );
+
+        // 4. 이미지 업데이트
+        List<PopupStoreImageList> newImgs = null;
+        if (imgs != null && !imgs.isEmpty()) {
+            // 기존 이미지 삭제
+            popupStoreImageJpaRepository.deleteAll(existingImgs);
+
+            // 새 이미지 저장
+            newImgs = imgs.stream()
+                    .map(image -> new PopupStoreImageList(new PopupStoreImageListId(id, image)))
+                    .toList();
+            popupStoreImageJpaRepository.saveAll(newImgs);
+        }
+        else {
+            newImgs = existingImgs;
+        }
+
+        // 5. 결과 반환
+        return new UpdatePopupStoreTO(rowsUpdated, newImgs);
+    }
+
+     */
 
 
     // 4. Delete : 팝업리스트 삭제

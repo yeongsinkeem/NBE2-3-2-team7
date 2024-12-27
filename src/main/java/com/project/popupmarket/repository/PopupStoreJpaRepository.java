@@ -17,6 +17,7 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
                     "where p.seq = :id" )
     List<PopupStore> findPopupStoreBySeq(Long id);
      */
+
     @Query("SELECT p FROM PopupStore p WHERE " +
             "(:targetLocation IS NULL OR p.targetLocation = :targetLocation) AND " +
             "(:type IS NULL OR p.type = :type) AND " +
@@ -33,8 +34,8 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
 
     @Modifying
     @Query("UPDATE PopupStore p " +
-            "SET p.thumbnail = COALESCE(:thumbnail, p.thumbnail), " +
-            "p.type = COALESCE(:type, p.type), " +
+            // "SET p.thumbnail = COALESCE(:thumbnail, p.thumbnail), " +
+            "SET p.type = COALESCE(:type, p.type), " +
             "p.targetAgeGroup = COALESCE(:targetAgeGroup, p.targetAgeGroup), " +
             "p.targetLocation = COALESCE(:targetLocation, p.targetLocation), " +
             "p.title = COALESCE(:title, p.title), " +
@@ -45,7 +46,7 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             "WHERE p.id = :id")
     int updatePopupStore(
             @Param("id") Long id,
-            @Param("thumbnail") String thumbnail,
+            //@Param("thumbnail") String thumbnail,
             @Param("type") String type,
             @Param("targetAgeGroup") String targetAgeGroup,
             @Param("targetLocation") String targetLocation,
