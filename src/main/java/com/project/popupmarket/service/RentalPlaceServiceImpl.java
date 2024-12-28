@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,10 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class RentalPlaceServiceImpl {
@@ -134,12 +130,13 @@ public class RentalPlaceServiceImpl {
         List<RentalPlaceTO> toList = new ArrayList<>();
         for (Object[] result : results) {
             RentalPlaceTO to = new RentalPlaceTO();
-            to.setThumbnail(result[0] != null
-                    ? "/images/place_thumbnail/" + (String) result[0]
+            to.setId((Long) result[0]);
+            to.setThumbnail(result[1] != null
+                    ? "/images/place_thumbnail/" + (String) result[1]
                     : null);
-            to.setAddress((String) result[1]);
-            to.setName((String) result[2]);
-            to.setStatus((String) result[3]);
+            to.setAddress((String) result[2]);
+            to.setName((String) result[3]);
+            to.setStatus((String) result[4]);
             toList.add(to);
         }
 
@@ -171,6 +168,13 @@ public class RentalPlaceServiceImpl {
         }
         rentalPlaceJpaRepository.save(savedPlace);
 
+        return flag;
+    }
+
+    public int updateRentalPlaceStatus(Long id, String status) {
+        int flag = 0;
+
+        rentalPlaceJpaRepository.updateStatusById(id, status);
         return flag;
     }
 
