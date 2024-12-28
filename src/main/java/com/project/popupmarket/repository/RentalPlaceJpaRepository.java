@@ -2,6 +2,7 @@ package com.project.popupmarket.repository;
 
 import com.project.popupmarket.dto.RentalPlaceTO;
 import com.project.popupmarket.entity.RentalPlace;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +19,7 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
     @Query(value = "SELECT seq as id, name, price, address, thumbnail  FROM rental_place ORDER BY seq LIMIT 10", nativeQuery = true)
     List<Object[]> findWithLimit();
 
-    @Query("SELECT rp.thumbnail, rp.address, rp.name, rp.status " +
+    @Query("SELECT rp.id, rp.thumbnail, rp.address, rp.name, rp.status " +
             "FROM RentalPlace rp WHERE rp.rentalUserSeq.id = :userId")
     List<Object[]> findRentalPlacesByUserId(@Param("userId") Long userId);
 
@@ -46,9 +47,14 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
     Long findUserSeqById(@Param("id") Long id);
 
     @Modifying
+    @Transactional
     @Query("DELETE FROM RentalPlace r WHERE r.id = :id")
     void deleteRentalPlaceById(@Param("id") Long id);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE RentalPlace r SET r.status = :status WHERE r.id = :id")
+    void updateStatusById(@Param("id") Long id, @Param("status") String status);
 
 
 }
