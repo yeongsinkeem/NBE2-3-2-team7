@@ -1,4 +1,4 @@
-package com.project.popupmarket.configure;
+package com.project.popupmarket.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
