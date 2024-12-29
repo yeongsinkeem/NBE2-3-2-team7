@@ -73,7 +73,24 @@ public class PopupStore {
 
     // 2. 하나의 PopupStore는 여러 개의 PopupStoreImageList 가질 수 있음
     // PopupStoreImageList ) "popupStoreSeq"가 외래 키 역할
-    @OneToMany(mappedBy = "popupStoreSeq")
+    // 팝업 스토어와 이미지들이 함께 저장되고 삭제되도록 설정
+    @OneToMany(mappedBy = "popupStoreSeq", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PopupStoreImageList> popupStoreImageLists = new LinkedHashSet<>();
+
+    // [ Image 추가 관련 메서드 : 양방향 연관 관계 메서드 ]
+    // 1. 이미지 추가
+    /*
+    public void addImage(PopupStoreImageList image) {
+        popupStoreImageLists.add(image);
+        image.setPopupStoreSeq(this);
+    }
+    // 2. 이미지 제거
+    public void removeImage(PopupStoreImageList image) {
+        popupStoreImageLists.remove(image);
+        image.setPopupStoreSeq(null);
+    }
+
+     */
+
 
 }
