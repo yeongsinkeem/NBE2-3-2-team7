@@ -1,6 +1,6 @@
-package com.project.popupmarket.service;
+package com.project.popupmarket.service.popupService;
 
-import com.project.popupmarket.dto.PopupStoreTO;
+import com.project.popupmarket.dto.popupDto.PopupStoreTO;
 import com.project.popupmarket.entity.PopupStore;
 import com.project.popupmarket.entity.PopupStoreImageList;
 import com.project.popupmarket.entity.PopupStoreImageListId;
