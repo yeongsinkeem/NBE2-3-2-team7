@@ -1,7 +1,5 @@
 package com.project.popupmarket.service;
 
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,4 +30,21 @@ public class PopupStoreFileStorageService {
 
     }
 
+    // 파일 삭제
+    public boolean deleteFile(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+
+        if (Files.exists(path)) {
+            try {
+                Files.delete(path);
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to delete file " + filePath + ": " + e.getMessage());
+                return false; // 파일 삭제 실패
+            }
+        } else {
+            System.err.println("File does not exist: " + filePath);
+            return false; // 파일이 존재하지 않음
+        }
+    }
 }

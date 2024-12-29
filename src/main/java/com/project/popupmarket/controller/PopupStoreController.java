@@ -1,6 +1,5 @@
 package com.project.popupmarket.controller;
 
-
 import com.project.popupmarket.dto.PopupStoreImgDTO;
 import com.project.popupmarket.dto.PopupStoreTO;
 import com.project.popupmarket.repository.PopupStoreImageJpaRepository;
@@ -20,7 +19,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -56,7 +57,6 @@ public class PopupStoreController {
 
             // 2. 상세 이미지 저장
             String imagesPath = "src/main/resources/static/images/popup_detail";
-            String imagesPath2 = "images/popup_detail/";
 
             int i = 1;
             for (MultipartFile img : images) {
@@ -108,55 +108,43 @@ public class PopupStoreController {
         if (to == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PopupStore not found with seq: " + seq);
         }
-        // return new PopupStoreImgDTO(to, imgLst);
         return new PopupStoreImgDTO(to, imgLst);
     }
 
-    // 2 - 3. Read : 관리 중인 팝업 페이지 목록
+    // [ Read ] - 3 : 관리 중인 팝업 페이지 목록
     // User 기능 추가시 구현 예정
     // thumbnail, seq(팝업 기획자의 팝업 데이터), type, title, 입점 요청 몇 회 받았는지
     // @GetMapping("/mypage/popup")
 
 
-    /*
-    // 3. Update : 번호에 해당하는 팝업 수정
-    @PutMapping("/mypage/popup/edit/{seq}")
+    // [ Update ] : 개별 팝업 스토어 수정
+    @PutMapping(value = "/mypage/popup/edit/{seq}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "개별 팝업 수정")
-    public ResponseEntity<String> updatePopup(@PathVariable Long seq, @RequestBody PopupStoreTO popupStore) {
-        int result = popupStoreServiceImpl.update(seq, popupStore);
+    public ResponseEntity<Map<String, Object>> updatePopup(@PathVariable Long seq,
+                                              @RequestPart(value = "popupStore", required = false) PopupStoreTO popupStore,
+                                              @RequestPart(value = "thumbnail", required = false) MultipartFile thimg,
+                                              @RequestPart(value = "images", required = false) List<MultipartFile> images) {
 
-        if (result > 0) {
-            return ResponseEntity.ok("PopupStore updated successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("PopupStore not found");
-        }
-    }
+        try {
+            // 1. 팝업스토어 업데이트
+            int thCount = popupStoreServiceImpl.updatePopup(seq, popupStore, thimg); // updatePopup 메서드는 int 반환
+            // 2. 팝업스토어 이미지 업데이트
+            int imgsCount = popupStoreServiceImpl.updatePopupImgs(seq, images);
 
-    // 3. Update : 번호에 해당하는 팝업 수정
-    @PutMapping("/mypage/popup/edit/{seq}")
-    @Operation(summary = "개별 팝업 수정")
-    public ResponseEntity<String> updatePopup(@PathVariable Long seq, @RequestBody PopupStoreImgDTO popupStoreImgDTO) {
-        PopupStoreTO to = popupStoreImgDTO.getPopupStore();
-        List<PopupStoreImageList> images = popupStoreImgDTO.getImages();
-
-        // 이때 to는 popupStore 엔티티로 변환된 상황
-        // int result = popupStoreServiceImpl.update(seq, to);
-        UpdatePopupStoreTO resultTO = popupStoreServiceImpl.update2(seq, to, images);
-
-        if (resultTO.getUpdateStatus() > 0) {
+            // 3. 응답 생성
             Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("message", "PopupStore updated succesfully.");
-            responseBody.put("updatedImages", resultTO.getUpdatedImages());
+            responseBody.put("message", "popupStore updated succesfully");
+            System.out.println("팝업스토어 업데이트 : " + thCount);
+            // imgsCount - 1: 정상
+            System.out.println("팝업스토어 이미지 업데이트 : " + imgsCount);
 
-            return ResponseEntity.ok("PopupStore updated successfully!");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("PopupStore not found");
+            return ResponseEntity.ok(responseBody);
+        } catch ( Exception e ) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An error occurred while updating PopupStore", "error", e.getMessage()));
         }
     }
-    */
 
-    // 4. Delete
+    // [ Delete ]
     // 팝업 관리 페이지 "/mypage/popup/view?번호={팝업번호}" -> 해당 팝업에 대한 상세 정보와 삭제하기 버튼 같이 출력
     // 이때 삭제하기 버튼을 누르면 해당 요청 시행
     @DeleteMapping("/mypage/popup/delete/{seq}")
