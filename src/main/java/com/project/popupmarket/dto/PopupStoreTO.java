@@ -1,14 +1,11 @@
 package com.project.popupmarket.dto;
 
-import com.project.popupmarket.entity.PopupStore;
-import com.project.popupmarket.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @NoArgsConstructor
 @Getter
