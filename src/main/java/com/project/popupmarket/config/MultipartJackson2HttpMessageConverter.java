@@ -1,4 +1,4 @@
-package com.project.popupmarket.configure;
+package com.project.popupmarket.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;

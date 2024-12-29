@@ -1,4 +1,4 @@
-package com.project.popupmarket.dto;
+package com.project.popupmarket.dto.popupDto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

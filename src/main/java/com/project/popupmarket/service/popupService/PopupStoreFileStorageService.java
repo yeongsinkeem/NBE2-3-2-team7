@@ -1,4 +1,4 @@
-package com.project.popupmarket.service;
+package com.project.popupmarket.service.popupService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

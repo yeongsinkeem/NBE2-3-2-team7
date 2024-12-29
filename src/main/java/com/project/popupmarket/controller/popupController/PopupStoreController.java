@@ -1,11 +1,11 @@
-package com.project.popupmarket.controller;
+package com.project.popupmarket.controller.popupController;
 
-import com.project.popupmarket.dto.PopupStoreImgDTO;
-import com.project.popupmarket.dto.PopupStoreTO;
+import com.project.popupmarket.dto.popupDto.PopupStoreImgDTO;
+import com.project.popupmarket.dto.popupDto.PopupStoreTO;
 import com.project.popupmarket.repository.PopupStoreImageJpaRepository;
 import com.project.popupmarket.repository.PopupStoreJpaRepository;
-import com.project.popupmarket.service.PopupStoreFileStorageService;
-import com.project.popupmarket.service.PopupStoreServiceImpl;
+import com.project.popupmarket.service.popupService.PopupStoreFileStorageService;
+import com.project.popupmarket.service.popupService.PopupStoreServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
