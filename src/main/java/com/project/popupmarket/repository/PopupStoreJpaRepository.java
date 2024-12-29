@@ -34,7 +34,6 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
 
     @Modifying
     @Query("UPDATE PopupStore p " +
-            // "SET p.thumbnail = COALESCE(:thumbnail, p.thumbnail), " +
             "SET p.type = COALESCE(:type, p.type), " +
             "p.targetAgeGroup = COALESCE(:targetAgeGroup, p.targetAgeGroup), " +
             "p.targetLocation = COALESCE(:targetLocation, p.targetLocation), " +
@@ -46,7 +45,6 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             "WHERE p.id = :id")
     int updatePopupStore(
             @Param("id") Long id,
-            //@Param("thumbnail") String thumbnail,
             @Param("type") String type,
             @Param("targetAgeGroup") String targetAgeGroup,
             @Param("targetLocation") String targetLocation,

@@ -1,7 +1,6 @@
 package com.project.popupmarket.service;
 
 import com.project.popupmarket.dto.PopupStoreTO;
-import com.project.popupmarket.dto.UpdatePopupStoreTO;
 import com.project.popupmarket.entity.PopupStore;
 import com.project.popupmarket.entity.PopupStoreImageList;
 import com.project.popupmarket.entity.PopupStoreImageListId;
@@ -11,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,10 @@ public class PopupStoreServiceImpl {
     private PopupStoreJpaRepository popupStoreJpaRepository;
     @Autowired
     private PopupStoreImageJpaRepository popupStoreImageJpaRepository;
+    @Autowired
+    private PopupStoreFileStorageService popupStoreFileStorageService;
 
+    // 1. Create : 팝업스토어 추가
     @Transactional
     public int insert(PopupStoreTO to, String thimg, List<String> imgs) {
         int flag = 0;
@@ -43,7 +45,6 @@ public class PopupStoreServiceImpl {
             // 3. 팝업 TO 썸네일 파일 이름 설정
             // ex ) "images/popup_thumbnail/~"
             popupStore.setThumbnail(thimg);
-            System.out.println("팝업 썸네일 이름은 : " + popupStore.getThumbnail());
 
             // 4. 각 이미지에 대해 PopupStoreImageList 엔티티 생성
             List<PopupStoreImageList> imageLists = imgs.stream()
@@ -60,13 +61,6 @@ public class PopupStoreServiceImpl {
         finally {
             return flag;
         }
-    }
-
-    @Transactional
-    public void updateThumbnail(Long seq, String thimg) {
-        PopupStore popupStore = popupStoreJpaRepository.findById(seq).orElseThrow(() -> new RuntimeException("Popup store not found"));
-        popupStore.setThumbnail(thimg);
-        popupStoreJpaRepository.save(popupStore);
     }
 
     // 2 - 1. Read : 특정 번호에 해당하는 팝업스토어 상세 정보
@@ -98,74 +92,121 @@ public class PopupStoreServiceImpl {
         return lists;
     }
 
+    // 3 - 1 : Update PopupStore
     @Transactional
-    public int update(Long id, PopupStoreTO popupStore) {
-        // 기존 값 가져오기
-        PopupStore existingPopup = popupStoreJpaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Popup not found"));
+    public int updatePopup(Long seq, PopupStoreTO to, MultipartFile thumbnail) {
+        // 1. 기존 팝업스토어 가져오기
+        PopupStore existingPopupStore = popupStoreJpaRepository.findById(seq)
+                .orElseThrow(() -> new EntityNotFoundException("PopupStore not found for ID: " + seq));
 
-        // 값 설정 : 이때 변경 값만을 반영, 값이 null이면 기존 값 유지
-        // String thumbnail = (popupStore.getThumbnail() != null) ? popupStore.getThumbnail() : existingPopup.getThumbnail();
-        String type = (popupStore.getType() != null) ? popupStore.getType() : existingPopup.getType();
-        String targetAgeGroup = (popupStore.getTargetAgeGroup() != null) ? popupStore.getTargetAgeGroup() : existingPopup.getTargetAgeGroup();
-        String targetLocation = (popupStore.getTargetLocation() != null) ? popupStore.getTargetLocation() : existingPopup.getTargetLocation();
-        String title = (popupStore.getTitle() != null) ? popupStore.getTitle() : existingPopup.getTitle();
-        Integer wishArea = (popupStore.getWishArea() != null) ? popupStore.getWishArea() : existingPopup.getWishArea();
-        String description = (popupStore.getDescription() != null) ? popupStore.getDescription() : existingPopup.getDescription();
-        LocalDate startDate = (popupStore.getStartDate() != null) ? popupStore.getStartDate() : existingPopup.getStartDate();
-        LocalDate endDate = (popupStore.getEndDate() != null) ? popupStore.getEndDate() : existingPopup.getEndDate();
+        // 2. 값 설정 : null이 아닌 값만 업데이트
+        String type = (to.getType() != null && !to.getType().isBlank()) ? to.getType() : existingPopupStore.getType();
+        String targetAgeGroup = (to.getTargetAgeGroup() != null && !to.getTargetAgeGroup().isBlank()) ? to.getTargetAgeGroup() : existingPopupStore.getTargetAgeGroup();
+        String targetLocation = (to.getTargetLocation() != null && !to.getTargetLocation().isBlank()) ? to.getTargetLocation() : existingPopupStore.getTargetLocation();
+        String title = (to.getTitle() != null && !to.getTitle().isBlank()) ? to.getTitle() : existingPopupStore.getTitle();
+        Integer wishArea = (to.getWishArea() != null) ? to.getWishArea() : existingPopupStore.getWishArea();
+        String description = (to.getDescription() != null && !to.getDescription().isBlank()) ? to.getDescription() : existingPopupStore.getDescription();
+        LocalDate startDate = (to.getStartDate() != null) ? to.getStartDate() : existingPopupStore.getStartDate();
+        LocalDate endDate = (to.getEndDate() != null) ? to.getEndDate() : existingPopupStore.getEndDate();
 
-        // List<String> imgs = (popupStore.g)
+        // 3. 썸네일 처리
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            String thPath = "src/main/resources/static/";
+            String existingThName = existingPopupStore.getThumbnail();
+            System.out.println("매개변수로 받은 썸네일 있습니당.");
 
-        // 업데이트 쿼리 실행
-        return popupStoreJpaRepository.updatePopupStore(
-                id, type, targetAgeGroup, targetLocation, title, wishArea, description, startDate, endDate
-        );
-    }
+            try {
+                // 기존 썸네일 삭제
+                if (existingThName != null) {
+                    String deleteThPath = thPath + "/" + existingThName;
+                    System.out.println("삭제 파일은 : " + deleteThPath);
+                    boolean deleted = popupStoreFileStorageService.deleteFile(deleteThPath);
+                    if (!deleted) {
+                        throw new RuntimeException("Failed to delete existing thumbnail: " + existingThName);
+                    }
+                }
 
-    /*
-    @Transactional
-    public UpdatePopupStoreTO update2(Long id, PopupStoreTO popupStore, List<String> imgs) {
-        // 1. 기존 값 가져오기
-        PopupStore existingPopup = popupStoreJpaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Popup not found"));
-        List<String> existingImgs = popupStoreImageJpaRepository.findById_PopupStoreSeq(id);
-
-        // 2. 팝업스토어 수정 : 이때 변경 값만을 반영, 값이 null이면 기존 값 유지
-        // String thumbnail = (popupStore.getThumbnail() != null) ? popupStore.getThumbnail() : existingPopup.getThumbnail();
-        String type = (popupStore.getType() != null) ? popupStore.getType() : existingPopup.getType();
-        String targetAgeGroup = (popupStore.getTargetAgeGroup() != null) ? popupStore.getTargetAgeGroup() : existingPopup.getTargetAgeGroup();
-        String targetLocation = (popupStore.getTargetLocation() != null) ? popupStore.getTargetLocation() : existingPopup.getTargetLocation();
-        String title = (popupStore.getTitle() != null) ? popupStore.getTitle() : existingPopup.getTitle();
-        Integer wishArea = (popupStore.getWishArea() != null) ? popupStore.getWishArea() : existingPopup.getWishArea();
-        String description = (popupStore.getDescription() != null) ? popupStore.getDescription() : existingPopup.getDescription();
-        LocalDate startDate = (popupStore.getStartDate() != null) ? popupStore.getStartDate() : existingPopup.getStartDate();
-        LocalDate endDate = (popupStore.getEndDate() != null) ? popupStore.getEndDate() : existingPopup.getEndDate();
-
-        // 3. 팝업스토어 업데이트
-        int rowsUpdated = popupStoreJpaRepository.updatePopupStore(
-                id, type, targetAgeGroup, targetLocation, title, wishArea, description, startDate, endDate
-        );
-
-        // 4. 이미지 업데이트
-        List<PopupStoreImageList> newImgs = null;
-        if (imgs != null && !imgs.isEmpty()) {
-            // 기존 이미지 삭제
-            popupStoreImageJpaRepository.deleteAll(existingImgs);
-
-            // 새 이미지 저장
-            newImgs = imgs.stream()
-                    .map(image -> new PopupStoreImageList(new PopupStoreImageListId(id, image)))
-                    .toList();
-            popupStoreImageJpaRepository.saveAll(newImgs);
+                // 새로운 썸네일을 기존 이름으로 저장
+                popupStoreFileStorageService.storeFile(thumbnail, thPath, existingThName);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to store thumbnail with name: " + existingThName, e);
+            }
         }
         else {
-            newImgs = existingImgs;
+            System.out.println("받은 썸네일 없음");
         }
 
-        // 5. 결과 반환
-        return new UpdatePopupStoreTO(rowsUpdated, newImgs);
+        // 4. 업데이트 쿼리 실행
+        return popupStoreJpaRepository.updatePopupStore(
+                seq, type, targetAgeGroup, targetLocation, title, wishArea, description, startDate, endDate
+        );
     }
 
-     */
+    // 3 - 2 : Update PopupStoreImageList
+    @Transactional
+    public int updatePopupImgs(Long seq, List<MultipartFile> newImgs) {
+        // 1. 기존 팝업스토어 가져오기
+        PopupStore existingPopupStore = popupStoreJpaRepository.findById(seq)
+                .orElseThrow(() -> new EntityNotFoundException("PopupStore not found for ID: " + seq));
+
+
+        String imgPath = "src/main/resources/static/";
+
+        // 2. 기존 이미지 리스트 가져오기
+        List<String> existingImgs = popupStoreImageJpaRepository.findById_PopupStoreSeq(seq);
+
+        try {
+            // 3. 새 이미지 없다면 기존 이미지 유지
+            if (newImgs == null || newImgs.isEmpty()) {
+                return 0;
+            }
+
+            // 4. 새 이미지 있다면 기존 이미지 삭제
+            if (existingImgs != null && !existingImgs.isEmpty()) {
+                for (String img : existingImgs) {
+                    System.out.println("기존 이미지 이름 : " + img);
+                    String deleteImgPath = imgPath + "/" + img;
+                    // 파일 경로에서 삭제
+                    boolean deleted = popupStoreFileStorageService.deleteFile(deleteImgPath);
+                    if (!deleted) {
+                        throw new RuntimeException("Failed to delete existing img: " + img);
+                    }
+                }
+                // DB에서 삭제
+                popupStoreImageJpaRepository.deleteAllById(seq);
+            }
+
+            // 5. 새로운 이미지 저장
+            List<PopupStoreImageList> newImageEntities = new ArrayList<>();
+            int i = 1;
+            for (MultipartFile newImg : newImgs) {
+                if (!newImg.isEmpty()) {
+                    // 이미지 이름 지정
+                    String originalName = newImg.getOriginalFilename();
+                    String ext = originalName.substring(originalName.lastIndexOf(".") + 1);
+                    String newImgName = "popup_" + (seq) + "_images_" + i + "." + ext;
+
+                    // 파일 저장
+                    popupStoreFileStorageService.storeFile(newImg, imgPath + "images/popup_detail/", newImgName);
+
+                    // 이미지 엔티티 생성
+                    PopupStoreImageList newImage = new PopupStoreImageList();
+                    newImage.setId(new PopupStoreImageListId(seq, newImgName));
+                    newImageEntities.add(newImage);
+
+                    i++;
+                }
+            }
+
+            // 6. 새 이미지 레코드 삽입
+            popupStoreImageJpaRepository.saveAll(newImageEntities);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to update popup images for PopupStore ID: " + seq, e);
+        }
+        return 1;
+    }
+
+
 
     // 4. Delete : 팝업리스트 삭제
     public int delete(long seq) {

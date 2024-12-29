@@ -24,4 +24,9 @@ public interface PopupStoreImageJpaRepository extends JpaRepository<PopupStoreIm
             @Param("id") PopupStoreImageListId id,
             @Param("image") String image
     );
+
+    @Modifying
+    @Query("DELETE FROM PopupStoreImageList pi WHERE pi.id.popupStoreSeq = :popupStoreSeq")
+    void deleteAllById(@Param("popupStoreSeq") Long popupStoreSeq);
+
 }
