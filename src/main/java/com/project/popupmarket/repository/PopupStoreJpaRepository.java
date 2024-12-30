@@ -23,14 +23,26 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             "(:type IS NULL OR p.type = :type) AND " +
             "(:targetAgeGroup IS NULL OR p.targetAgeGroup = :targetAgeGroup) AND " +
             "(:startDate IS NULL OR p.startDate >= :startDate) AND " +
-            "(:endDate IS NULL OR p.endDate <= :endDate)")
+            "(:endDate IS NULL OR p.endDate <= :endDate)" +
+            "ORDER BY " +
+            "CASE WHEN :sorting = 'registered_desc' THEN p.registered END DESC, " +
+            "CASE WHEN :sorting = 'registered_asc' THEN p.registered END ASC, " +
+            "CASE WHEN :sorting IS NULL OR :sorting = '' THEN p.registered END DESC," +
+            "CASE WHEN :sorting NOT IN ('registered_desc', 'registered_asc') THEN p.registered END DESC"
+    )
     List<PopupStore> findByFilter(
             @Param("targetLocation") String targetLocation,
             @Param("type") String type,
             @Param("targetAgeGroup") String targetAgeGroup,
             @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("endDate") LocalDate endDate,
+            @Param("sorting") String sorting
     );
+
+    @Query("SELECT p FROM PopupStore p " +
+            "WHERE p.popupUserSeq.id = :userSeq " +
+            "ORDER BY p.registered DESC")
+    List<PopupStore> findByUserSeq(@Param("userSeq") Long userSeq);
 
     @Modifying
     @Query("UPDATE PopupStore p " +
@@ -49,7 +61,7 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             @Param("targetAgeGroup") String targetAgeGroup,
             @Param("targetLocation") String targetLocation,
             @Param("title") String title,
-            @Param("wishArea") Integer wishArea,
+            @Param("wishArea") String wishArea,
             @Param("description") String description,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
