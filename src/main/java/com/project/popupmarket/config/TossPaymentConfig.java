@@ -1,4 +1,4 @@
-package com.project.popupmarket.configure;
+package com.project.popupmarket.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

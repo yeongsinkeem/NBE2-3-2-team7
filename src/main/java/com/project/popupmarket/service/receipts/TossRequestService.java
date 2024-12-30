@@ -1,7 +1,7 @@
 package com.project.popupmarket.service.receipts;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.popupmarket.configure.TossPaymentConfig;
+import com.project.popupmarket.config.TossPaymentConfig;
 import com.project.popupmarket.dto.payment.TossPaymentTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
