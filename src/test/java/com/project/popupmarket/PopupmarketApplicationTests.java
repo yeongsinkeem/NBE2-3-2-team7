@@ -1,13 +1,12 @@
 package com.project.popupmarket;
 
-import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class PopupmarketApplicationTests {
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-    @Test
-    void contextLoads() {
-    }
+@SpringBootTest
+@AutoConfigureMockMvc
+class PopupmarketApplicationTests {
 
 }

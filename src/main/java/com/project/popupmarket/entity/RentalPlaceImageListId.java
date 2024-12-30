@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import java.io.Serial;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Embeddable
+@ToString
 public class RentalPlaceImageListId implements Serializable {
     @Serial
     private static final long serialVersionUID = 1610323546044463757L;
