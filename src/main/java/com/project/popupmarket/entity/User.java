@@ -1,68 +1,92 @@
 package com.project.popupmarket.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
-@Getter
-@Setter
+import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
-@Table(name = "user")
-public class User {
+@Table(name = "users")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "seq", nullable = false)
     private Long id;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Size(max = 255)
-    @Column(name = "password")
+    @Column(length = 255, nullable = false)
     private String password;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "name", nullable = false)
+    @Column(length = 255, nullable = false)
     private String name;
 
-    @Size(max = 255)
-    @Column(name = "social")
+    @Column(length = 255)
     private String social;
 
-    @Size(max = 255)
-    @Column(name = "brand")
+    @Column(length = 255)
     private String brand;
 
-    @Size(max = 20)
-    @Column(name = "tel", length = 20)
+    @Column(length = 20)
     private String tel;
 
-    @Size(max = 255)
-    @Column(name = "profile_image")
-    private String profileImage;
+    @Column(length = 255)
+    private String profile_image;
 
-    @NotNull
-    @ColumnDefault("current_timestamp()")
-    @Column(name = "registered_at", nullable = false)
-    private Instant registeredAt;
+    @Column(nullable = false)
+    private LocalDateTime registered_at;
 
-    @OneToMany(mappedBy = "userSeq")
-    private Set<JwtToken> jwtTokens = new LinkedHashSet<>();
+    @PrePersist
+    protected void onCreate() {
+        registered_at = LocalDateTime.now();
+    }
 
-    @OneToMany(mappedBy = "popupUserSeq")
-    private Set<PopupStore> popupStores = new LinkedHashSet<>();
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("user"));
+    }
 
-    @OneToMany(mappedBy = "rentalUserSeq")
-    private Set<RentalPlace> rentalPlaces = new LinkedHashSet<>();
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
