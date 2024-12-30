@@ -1,7 +1,7 @@
-package com.project.popupmarket.service;
+package com.project.popupmarket.service.rentalService;
 
-import com.project.popupmarket.dto.RentalPlaceImageListTO;
-import com.project.popupmarket.dto.RentalPlaceTO;
+import com.project.popupmarket.dto.rentalDto.RentalPlaceImageListTO;
+import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
 import com.project.popupmarket.entity.RentalPlace;
 import com.project.popupmarket.entity.RentalPlaceImageList;
 import com.project.popupmarket.entity.RentalPlaceImageListId;
@@ -170,7 +170,7 @@ public class RentalPlaceServiceImpl {
 
         return flag;
     }
-
+    @Transactional
     public int updateRentalPlaceStatus(Long id, String status) {
         int flag = 0;
 
@@ -276,13 +276,11 @@ public class RentalPlaceServiceImpl {
         } else {
             // 이미지가 있을 때 처리
             for (int i = 0; i < images.size(); i++) {
-                // 파일명 생성
+
                 String imageName = String.format("rental_%d_%d_images_%d.png", id, userSeq, i + 1);
 
-                // 파일 저장
                 saveFile(images.get(i), "place_detail", imageName);
 
-                // DB 저장
                 RentalPlaceImageListId imageListId = new RentalPlaceImageListId();
                 imageListId.setRentalPlaceSeq(id);
                 imageListId.setImage(imageName);

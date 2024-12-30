@@ -1,8 +1,8 @@
-package com.project.popupmarket.controller;
+package com.project.popupmarket.controller.rentalController;
 
-import com.project.popupmarket.dto.RentalPlaceImageListTO;
-import com.project.popupmarket.dto.RentalPlaceTO;
-import com.project.popupmarket.service.RentalPlaceServiceImpl;
+import com.project.popupmarket.dto.rentalDto.RentalPlaceImageListTO;
+import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
+import com.project.popupmarket.service.rentalService.RentalPlaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,20 +27,24 @@ public class PopupMarketController {
     private RentalPlaceServiceImpl rentalPlaceService;
 
     @GetMapping("/main")
-    public ResponseEntity<List<RentalPlaceTO>> MainPage() { // main 페이지 최신 등록 데이터 10개
+    public ResponseEntity<List<RentalPlaceTO>> mainPage() { // main 페이지 최신 등록 데이터 10개 조회
         //name, price, address, thumbnail -> default
         List<RentalPlaceTO> results = rentalPlaceService.findWithLimit();
+
+        if (results == null || results.isEmpty()) { // 결과가 비어 있는 경우 204 No Content
+            return ResponseEntity.noContent().build();
+        }
 
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("/rental/list")
-    public ResponseEntity<Page<RentalPlaceTO>> ListPage( // 리스트 페이지 + 필터링 + 페이지네이션
-            @RequestParam(required = false) Integer minCapacity,
-            @RequestParam(required = false) Integer maxCapacity,
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
+    public ResponseEntity<Page<RentalPlaceTO>> listPage( // 임대 리스트 페이지 9개 + 필터링 + 페이지네이션
+            @RequestParam(required = false) Integer minCapacity, // 최소 면적 기본값 0
+            @RequestParam(required = false) Integer maxCapacity, // 최소 면적 기본값 100
+            @RequestParam(required = false) String location,     // 위치, 기본값 null
+            @RequestParam(required = false) BigDecimal minPrice, // 최소 가격 기본값 0
+            @RequestParam(required = false) BigDecimal maxPrice, // 최소 가격 기본값 10000000
             @RequestParam(defaultValue = "0") int page
     ) {
         //Query Parameter -> DTO?
@@ -56,17 +60,25 @@ public class PopupMarketController {
         Pageable pageable = PageRequest.of(page, 9);
         Page<RentalPlaceTO> results = rentalPlaceService.findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, pageable);
 
+
+        if (results.isEmpty()) { // 결과가 비어 있는 경우 204 No Content
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("/rental/detail/{id}")
-    public ResponseEntity<Map<String, Object>> RentalPlaceDetailsPage( // 임대페이지 상세 정보
+    public ResponseEntity<Map<String, Object>> rentalPlaceDetailsPage( // 임대페이지 상세 정보 조회
             @PathVariable Long id
     ) {
         // 썸네일과 상태 제외 모두 전송
-        RentalPlaceTO rentalPlaceTO = rentalPlaceService.findDetailById(id);
-        List<RentalPlaceImageListTO> imageTo = rentalPlaceService.findRentalPlaceImageList(id);
+        RentalPlaceTO rentalPlaceTO = rentalPlaceService.findDetailById(id); // 임대 상세 정보 조회
+        List<RentalPlaceImageListTO> imageTo = rentalPlaceService.findRentalPlaceImageList(id); // 이미지 리스트 조회
 
+        if (rentalPlaceTO == null) { // 결과가 비어 있는 경우 204 No Content
+            return ResponseEntity.noContent().build();
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("rentalPlace", rentalPlaceTO);
@@ -77,15 +89,20 @@ public class PopupMarketController {
 
 
     @GetMapping("/mypage/rental/view/{id}")//마이페이지 임대 리스트
-    public ResponseEntity<List<RentalPlaceTO>> RentalListPage(
+    public ResponseEntity<List<RentalPlaceTO>> rentalListPage(
             @PathVariable("id") Long id
     ) {
         List<RentalPlaceTO> to = rentalPlaceService.findRentalPlacesByUserId(id);
+
+        if (to.isEmpty()) { // 결과가 비어 있는 경우 204 No Content
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(to);
     }
 
     @PutMapping("/mypage/rental/view/{id}/status")//마이페이지 임대 리스트에서 status 변환 -> ACTIVE, INACTIVE
-    public ResponseEntity<Void> UpdateRentalStatusPage(
+    public ResponseEntity<Void> updateRentalStatusPage(
             @PathVariable("id") Long id,
             @RequestParam String status
     ) {
@@ -94,10 +111,8 @@ public class PopupMarketController {
         return ResponseEntity.ok().build();
     }
 
-
-
     @PostMapping(value = "/mypage/rental/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> InsertRentalPlacePage( // 임대페이지 데이터 create
+    public ResponseEntity<Void> insertRentalPlacePage( // 임대페이지 데이터 create
             @RequestPart("rentalPlace") RentalPlaceTO rentalPlaceTO,
             @RequestPart("thumbnail") MultipartFile thumbnail,
             @RequestPart("images") List<MultipartFile> images
@@ -118,6 +133,10 @@ public class PopupMarketController {
     ) {
         RentalPlaceTO to = rentalPlaceService.findById(id);
         List<RentalPlaceImageListTO> imageTo = rentalPlaceService.findRentalPlaceImageList(id);
+
+        if (to == null) { // 결과가 비어 있는 경우 204 No Content
+            return ResponseEntity.noContent().build();
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("rentalPlace", to);
