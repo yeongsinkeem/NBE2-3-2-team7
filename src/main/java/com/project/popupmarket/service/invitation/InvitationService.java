@@ -1,4 +1,4 @@
-package com.project.popupmarket.service;
+package com.project.popupmarket.service.invitation;
 
 import com.project.popupmarket.dto.invitation.InvitationTO;
 import com.project.popupmarket.entity.PlaceRequest;

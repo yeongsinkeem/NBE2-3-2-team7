@@ -1,4 +1,4 @@
-package com.project.popupmarket.service;
+package com.project.popupmarket.service.receipts;
 
 import com.project.popupmarket.dto.payment.*;
 import com.project.popupmarket.entity.*;

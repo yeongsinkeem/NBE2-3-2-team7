@@ -1,4 +1,4 @@
-package com.project.popupmarket.service;
+package com.project.popupmarket.service.receipts;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.popupmarket.configure.TossPaymentConfig;

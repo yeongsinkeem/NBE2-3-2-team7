@@ -1,13 +1,10 @@
-package com.project.popupmarket.controller;
+package com.project.popupmarket.controller.payment;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.popupmarket.dto.payment.*;
-import com.project.popupmarket.dto.Resp;
-import com.project.popupmarket.service.PaymentService;
-import com.project.popupmarket.service.TossRequestService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.project.popupmarket.service.receipts.PaymentService;
+import com.project.popupmarket.service.receipts.TossRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +17,8 @@ import java.util.List;
 @RequestMapping("api")
 public class PaymentController {
 
-    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
     private final PaymentService paymentService;
     private final TossRequestService tossRequestService;
-
 
     @Autowired
     public PaymentController(PaymentService paymentService, TossRequestService tossRequestService) {
@@ -59,7 +54,7 @@ public class PaymentController {
     }
 
     @PostMapping("/payment")
-    public ResponseEntity<Resp> payment(
+    public ResponseEntity<String> payment(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody ReceiptTO receipt
     ) {
@@ -70,14 +65,14 @@ public class PaymentController {
         boolean flag = paymentService.insertStagingPayment(receipt);
 
         if (flag) {
-            return ResponseEntity.ok(new Resp(200, "success"));
+            return ResponseEntity.ok("success");
         } else {
-            return ResponseEntity.status(400).body(new Resp(400, "fail"));
+            return ResponseEntity.status(400).body("fail");
         }
     }
 
     @PostMapping("/payment/success")
-    public ResponseEntity<Resp> paymentSuccess(
+    public ResponseEntity<String> paymentSuccess(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody TossPaymentTO payment
     ) throws JsonProcessingException {
@@ -95,22 +90,22 @@ public class PaymentController {
             boolean flag = paymentService.insertReceipt(receipt);
 
             if (flag) {
-                return ResponseEntity.ok(new Resp(200,"결제 성공"));
+                return ResponseEntity.ok("결제 성공");
             } else {
                 HttpResponse<String> canceled = tossRequestService.cancelPayment(payment.getPaymentKey(), "시스템 에러로 인한 결제 취소");
-                return ResponseEntity.status(500).body(new Resp(500, "결제 실패"));
+                return ResponseEntity.status(500).body("결제 실패");
             }
         } else if (response != null){
             return ResponseEntity.status(response.statusCode())
-                    .body(new Resp(response.statusCode(),"결제 실패"));
+                    .body("결제 실패");
         } else {
             return ResponseEntity.status(500)
-                    .body(new Resp(500,"시스템 에러"));
+                    .body("시스템 에러");
         }
     }
 
     @DeleteMapping("/payment/fail")
-    public ResponseEntity<Resp> paymentFail(
+    public ResponseEntity<String> paymentFail(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody ReceiptTO receipt
     ) {
@@ -119,9 +114,9 @@ public class PaymentController {
 
         int statusCode = paymentService.deleteStagingPayment(receipt);
         if (statusCode == 200) {
-            return ResponseEntity.ok(new Resp(statusCode, "success"));
+            return ResponseEntity.ok("success");
         } else {
-            return ResponseEntity.status(statusCode).body(new Resp(statusCode, "fail"));
+            return ResponseEntity.status(statusCode).body("fail");
         }
     }
 
@@ -150,7 +145,7 @@ public class PaymentController {
     }
 
     @PutMapping("/receipt/{orderId}")
-    public ResponseEntity<Resp> receipt(
+    public ResponseEntity<String> receipt(
             /*@RequestHeader("Authorization") String token*/
             @PathVariable String orderId
     ) {
@@ -161,9 +156,9 @@ public class PaymentController {
 
         if (payment != null) {
             HttpResponse<String> canceled = tossRequestService.cancelPayment(payment.getPaymentKey(), "시스템 에러로 인한 결제 취소");
-            return ResponseEntity.ok(new Resp(canceled.statusCode(), "success"));
+            return ResponseEntity.ok("success");
         } else {
-            return ResponseEntity.status(500).body(new Resp(500, "fail"));
+            return ResponseEntity.status(500).body("fail");
         }
     }
 
