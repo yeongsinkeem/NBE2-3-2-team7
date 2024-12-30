@@ -1,8 +1,6 @@
 package com.project.popupmarket.repository;
 
-import com.project.popupmarket.dto.RentalPlaceTO;
 import com.project.popupmarket.entity.RentalPlace;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -47,12 +45,10 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
     Long findUserSeqById(@Param("id") Long id);
 
     @Modifying
-    @Transactional
     @Query("DELETE FROM RentalPlace r WHERE r.id = :id")
     void deleteRentalPlaceById(@Param("id") Long id);
 
     @Modifying
-    @Transactional
     @Query("UPDATE RentalPlace r SET r.status = :status WHERE r.id = :id")
     void updateStatusById(@Param("id") Long id, @Param("status") String status);
 
