@@ -8,6 +8,7 @@ import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -55,7 +56,7 @@ public class PopupStore {
     // 팝업스토어 희망 면적 추가
     // Null 값 허용
     @Column(name = "wish_area")
-    private Integer wishArea;
+    private String wishArea;
 
     @NotNull
     @Column(name = "start_date", nullable = false)
@@ -64,6 +65,9 @@ public class PopupStore {
     @NotNull
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    @Column(name = "registered", nullable = false, updatable = false)
+    private LocalDateTime registered = LocalDateTime.now();
 
     // [ 외래키 관련 설정 ]
     // 1. 하나의 PopupStore는 여러 개의 PlaceRequest 가질 수 있음

@@ -66,30 +66,49 @@ public class PopupStoreServiceImpl {
     // 2 - 1. Read : 특정 번호에 해당하는 팝업스토어 상세 정보
     public PopupStoreTO findBySeq(Long seq) {
         // Repository에서 해당 데이터 찾기
-        PopupStore popupStore = popupStoreJpaRepository.findById(Long.valueOf(seq)).orElse(null);
+        PopupStore popupStore = popupStoreJpaRepository.findById(seq).orElse(null);
 
         if (popupStore == null) {
             return null;
         }
 
         // 엔티티 -> TO로 매핑
-        ModelMapper modelMapper = new ModelMapper();
-        PopupStoreTO to = modelMapper.map(popupStore, PopupStoreTO.class);
-
-        return to;
+        return new ModelMapper().map(popupStore, PopupStoreTO.class);
     }
 
     // 2 - 2. Read : 조건에 해당하는 팝업 미리보기
-    public List<PopupStoreTO> findByFilter(String targetLocation, String type, String targetAgeGroup, LocalDate startDate, LocalDate endDate) {
-        List<PopupStore> popupStores = popupStoreJpaRepository.findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate);
+    public List<PopupStoreTO> findByFilter(String targetLocation, String type, String targetAgeGroup, LocalDate startDate, LocalDate endDate, String sorting) {
         ModelMapper modelMapper = new ModelMapper();
 
         // 엔티티 -> TO로 매핑
-        List<PopupStoreTO> lists = popupStores.stream()
-                .map(p -> modelMapper.map(p, PopupStoreTO.class))
-                .collect(Collectors.toList());
+        return popupStoreJpaRepository
+                .findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate, sorting)
+                .stream()
+                .map(p -> {
+                    PopupStoreTO to = modelMapper.map(p, PopupStoreTO.class);
+                    if (to.getThumbnail() == null) {
+                        to.setThumbnail("thumbnail_default.png");
+                    }
+                    return to;
+                })
+                .toList();
+    }
 
-        return lists;
+    // 2 - 3. Read : 사용자가 등록한 팝업 목록 보기
+    public List<PopupStoreTO> findByUserSeq(Long userSeq) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        return popupStoreJpaRepository
+                .findByUserSeq(userSeq)
+                .stream()
+                .map(p -> {
+                    PopupStoreTO to = modelMapper.map(p, PopupStoreTO.class);
+                    if (to.getThumbnail() == null) {
+                        to.setThumbnail("thumbnail_default.png");
+                    }
+                    return to;
+                })
+                .toList();
     }
 
     // 3 - 1 : Update PopupStore
@@ -104,7 +123,7 @@ public class PopupStoreServiceImpl {
         String targetAgeGroup = (to.getTargetAgeGroup() != null && !to.getTargetAgeGroup().isBlank()) ? to.getTargetAgeGroup() : existingPopupStore.getTargetAgeGroup();
         String targetLocation = (to.getTargetLocation() != null && !to.getTargetLocation().isBlank()) ? to.getTargetLocation() : existingPopupStore.getTargetLocation();
         String title = (to.getTitle() != null && !to.getTitle().isBlank()) ? to.getTitle() : existingPopupStore.getTitle();
-        Integer wishArea = (to.getWishArea() != null) ? to.getWishArea() : existingPopupStore.getWishArea();
+        String wishArea = (to.getWishArea() != null) ? to.getWishArea() : existingPopupStore.getWishArea();
         String description = (to.getDescription() != null && !to.getDescription().isBlank()) ? to.getDescription() : existingPopupStore.getDescription();
         LocalDate startDate = (to.getStartDate() != null) ? to.getStartDate() : existingPopupStore.getStartDate();
         LocalDate endDate = (to.getEndDate() != null) ? to.getEndDate() : existingPopupStore.getEndDate();
