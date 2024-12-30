@@ -1,9 +1,23 @@
 window.addEventListener('DOMContentLoaded', ()=> {
 	slideImage();
-
 	createMap();
 	createPickCalendar();
-})
+});
+
+function reserve() {
+	// const placeSeq =  window.location.pathname.split('/').pop();
+	const placeSeq = 1;
+
+	const rentalDate = document.getElementById('quick-calendar').value.split(' ~ ');
+
+	if (rentalDate[0] === '' || rentalDate[1] === '' ||
+		rentalDate[0] === null || rentalDate[1] === null ||
+		rentalDate[0] === undefined || rentalDate[1] === undefined) {
+		alert('올바른 기간을 선택해주세요.');
+	} else {
+		window.location.href=`/payment?place=${placeSeq}&start=${rentalDate[0]}&end=${rentalDate[1]}`;
+	}
+}
 
 function slideImage() {
 	const slides = document.getElementById('image-container');

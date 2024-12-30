@@ -4,28 +4,30 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "receipts")
 public class Receipt {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "seq", nullable = false)
-    private Long id;
+    @Column(name = "payment_key", nullable = false)
+    private String paymentKey;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "popup_user_seq")
-    private User popupUserSeq;
+    @Column(name = "order_id", nullable = false)
+    private String orderId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rental_place_seq")
-    private RentalPlace rentalPlaceSeq;
+    @Column(name = "popup_user_seq", nullable = false)
+    private Long popupUserSeq;
+
+    @Column(name = "rental_place_seq", nullable = false)
+    private Long rentalPlaceSeq;
 
     @NotNull
     @Column(name = "start_date", nullable = false)
@@ -39,14 +41,24 @@ public class Receipt {
     private BigDecimal totalAmount;
 
     @NotNull
-    @Lob
+    @Enumerated(EnumType.STRING)
     @Column(name = "reservation_status", nullable = false)
-    private String reservationStatus;
+    private ReservationStatus reservationStatus;
 
     @NotNull
-    @ColumnDefault("'active'")
-    @Lob
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Column(name = "reserved_at", nullable = false, updatable = false)
+    private LocalDateTime reservedAt = LocalDateTime.now();
 
+    @Getter
+    public enum ReservationStatus {
+        COMPLETED("결제 완료"),
+        LEASED("임대 완료"),
+        CANCELED("환불 완료");
+
+        private final String desc;
+
+        ReservationStatus(String desc) {
+            this.desc = desc;
+        }
+    }
 }

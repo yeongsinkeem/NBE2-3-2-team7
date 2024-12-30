@@ -81,9 +81,6 @@ public class RentalPlace {
     private Set<PlaceRequest> popupStores = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "rentalPlaceSeq")
-    private Set<Receipt> receipts = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "rentalPlaceSeq")
     private Set<RentalPlaceImageList> rentalPlaceImageLists = new LinkedHashSet<>();
 
 }

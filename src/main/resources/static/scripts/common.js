@@ -34,6 +34,20 @@ function getTomorrow() {
 	return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
 }
 
+function getRangeDate(startDate, endDate) {
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+
+	const sYear = start.getFullYear();
+	const sMonth = start.getMonth() + 1;
+	const sDay = start.getDate();
+
+	const eYear = end.getFullYear();
+	const eMonth = end.getMonth() + 1;
+	const eDay = end.getDate();
+	return `${sYear}년 ${sMonth < 10 ? '0' + sMonth : sMonth}월 ${sDay < 10 ? '0' + sDay : sDay}일 ~ ${eYear}년 ${eMonth < 10 ? '0' + eMonth : eMonth}월 ${eDay < 10 ? '0' + eDay : eDay}일`;
+}
+
 function createPriceSlider() {
 	let slider = document.getElementById('price-slider');
 
@@ -140,4 +154,11 @@ function daumPostcode() {
 					addr.value = roadAddr;
 			}
 	}).open();
+}
+
+function getPeriod(startDate, endDate){
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+
+	return (end - start) / (1000 * 3600 * 24) + 1;
 }
