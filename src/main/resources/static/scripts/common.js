@@ -169,11 +169,28 @@ function getTomorrow() {
 	return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
 }
 
-function createPriceSlider() {
+function getRangeDate(startDate, endDate) {
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+
+	const sYear = start.getFullYear();
+	const sMonth = start.getMonth() + 1;
+	const sDay = start.getDate();
+
+	const eYear = end.getFullYear();
+	const eMonth = end.getMonth() + 1;
+	const eDay = end.getDate();
+	return `${sYear}년 ${sMonth < 10 ? '0' + sMonth : sMonth}월 ${sDay < 10 ? '0' + sDay : sDay}일 ~ ${eYear}년 ${eMonth < 10 ? '0' + eMonth : eMonth}월 ${eDay < 10 ? '0' + eDay : eDay}일`;
+}
+
+function createPriceSlider(min, max) {
 	let slider = document.getElementById('price-slider');
 
+	if(!min) min = 10;
+	if(!max) max = 1000;
+
 	noUiSlider.create(slider, {
-		start: [10, 1000],
+		start: [min, max],
 		connect: true,
 		range: {
 			'min': 10,
@@ -181,11 +198,11 @@ function createPriceSlider() {
 		},
 		format: {
 			to: function (value) {
-				if(value >= 1000) return '제한 없음';
-				return Math.round(value) + '만원';
+					if(value >= 1000) return Math.round(value) + '만원 이상';
+					return Math.round(value) + '만원';
 			},
 			from: function (value) {
-				return Number(value.replace('만원', ''));
+					return Number(value.replace('만원', '0000'));
 			}
 		},
 	});
@@ -193,15 +210,23 @@ function createPriceSlider() {
 	let priceRange = document.getElementById('price-range');
 
 	slider.noUiSlider.on('update', function(values, handle) {
+		startPrice = Number(values[0].replace('만원', '0000'));
+		endPrice = Number(values[1].replace(/만원\s?(이상)?/, '0000'));
 		priceRange.innerHTML = `${values[0]} ~ ${values[1]}`;
 	})
 }
 
-function createPlaceSlider() {
+let startPrice = 10;
+let endPrice = 1000;
+
+function createPlaceSlider(min, max) {
 	let slider = document.getElementById('place-slider');
 
+	if(!min) min = 0;
+	if(!max) max = 100;
+
 	noUiSlider.create(slider, {
-		start: [0, 100],
+		start: [min, max],
 		connect: true,
 		range: {
 			'min': 0,
@@ -209,8 +234,8 @@ function createPlaceSlider() {
 		},
 		format: {
 			to: function (value) {
-				if(value >= 100) return '제한 없음';
-				return Math.round(value) + '평';
+					if(value >= 100) return Math.round(value) + '평 이상';
+					return Math.round(value) + '평';
 			},
 			from: function (value) {
 				return Number(value.replace('평', ''));
@@ -221,9 +246,14 @@ function createPlaceSlider() {
 	let priceRange = document.getElementById('place-range');
 
 	slider.noUiSlider.on('update', function(values, handle) {
+		startArea = Number(values[0].replace('평', ''));
+		endArea = Number(values[1].replace(/평\s?(이상)?/, ''));
 		priceRange.innerHTML = `${values[0]} ~ ${values[1]}`;
 	})
 }
+
+let startArea = 0;
+let endArea = 100;
 
 let calendarInstance = null;
 

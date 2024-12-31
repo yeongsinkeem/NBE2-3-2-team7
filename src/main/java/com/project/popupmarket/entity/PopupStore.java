@@ -67,7 +67,7 @@ public class PopupStore {
     private LocalDate endDate;
 
     @Column(name = "registered", nullable = false, updatable = false)
-    private LocalDateTime registered = LocalDateTime.now();
+    private LocalDateTime registeredAt = LocalDateTime.now();
 
     // [ 외래키 관련 설정 ]
     // 1. 하나의 PopupStore는 여러 개의 PlaceRequest 가질 수 있음

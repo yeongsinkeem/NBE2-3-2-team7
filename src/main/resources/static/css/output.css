@@ -823,6 +823,10 @@ video {
   max-height: fit-content;
 }
 
+.min-h-28 {
+  min-height: 7rem;
+}
+
 .min-h-40 {
   min-height: 10rem;
 }

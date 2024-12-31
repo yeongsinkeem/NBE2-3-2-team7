@@ -8,6 +8,9 @@ import com.project.popupmarket.service.popupService.PopupStoreFileStorageService
 import com.project.popupmarket.service.popupService.PopupStoreServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -95,15 +98,18 @@ public class PopupStoreController {
     // : 조건에 해당하는 팝업들 미리보기 - targetLocation, type, targetAgeGroup, startDate ~ endDate
     @GetMapping("/popup/list")
     @Operation(summary = "조건에 해당하는 팝업 리스트")
-    public List<PopupStoreTO> getPopupByFilter(
+    public Page<PopupStoreTO> getPopupByFilter(
             @RequestParam(required = false) String targetLocation,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String targetAgeGroup,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
-            @RequestParam(required = false) String sorting
+            @RequestParam(required = false) String sorting,
+            @RequestParam(defaultValue = "0") int page
     ) {
-        return popupStoreServiceImpl.findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate, sorting);
+        Pageable pageable = PageRequest.of(page,9);
+
+        return popupStoreServiceImpl.findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate, sorting, pageable);
     }
 
     // [ READ ] - 2
@@ -132,7 +138,7 @@ public class PopupStoreController {
     // [ Update ] : 개별 팝업 스토어 수정
     @PutMapping(value = "/popup/{seq}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "개별 팝업 수정")
-    public ResponseEntity<Map<String, Object>> updatePopup(
+    public ResponseEntity<String> updatePopup(
             @PathVariable Long seq,
             @RequestPart(value = "popupStore", required = false) PopupStoreTO popupStore,
             @RequestPart(value = "thumbnail", required = false) MultipartFile thimg,
@@ -145,15 +151,13 @@ public class PopupStoreController {
             int imgsCount = popupStoreServiceImpl.updatePopupImgs(seq, images);
 
             // 3. 응답 생성
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("message", "popupStore updated succesfully");
             System.out.println("팝업스토어 업데이트 : " + thCount);
             // imgsCount - 1: 정상
             System.out.println("팝업스토어 이미지 업데이트 : " + imgsCount);
 
-            return ResponseEntity.ok(responseBody);
+            return ResponseEntity.ok("팝업 스토어 수정 성공");
         } catch ( Exception e ) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An error occurred while updating PopupStore", "error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -161,7 +165,7 @@ public class PopupStoreController {
     // 팝업 관리 페이지 "/mypage/popup/view?번호={팝업번호}" -> 해당 팝업에 대한 상세 정보와 삭제하기 버튼 같이 출력
     // 이때 삭제하기 버튼을 누르면 해당 요청 시행
     @DeleteMapping("/popup/{seq}")
-    @Operation(summary = "팝업 삭제")
+    @Operation(summary = "개별 팝업 삭제")
     public ResponseEntity<String> deletePopup(@PathVariable long seq) {
         int result = popupStoreServiceImpl.delete(seq);
 

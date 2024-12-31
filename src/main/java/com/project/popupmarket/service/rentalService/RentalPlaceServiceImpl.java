@@ -1,6 +1,6 @@
 package com.project.popupmarket.service.rentalService;
 
-import com.project.popupmarket.dto.rentalDto.RentalPlaceImageListTO;
+import com.project.popupmarket.dto.rentalDto.RentalPlaceImageTO;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
 import com.project.popupmarket.entity.RentalPlace;
 import com.project.popupmarket.entity.RentalPlaceImageList;
@@ -22,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RentalPlaceServiceImpl {
@@ -33,89 +35,62 @@ public class RentalPlaceServiceImpl {
     private RentalPlaceImageListJpaRepository rentalPlaceImageListJpaRepository;
 
     public List<RentalPlaceTO> findWithLimit() {
-        List<Object[]> lists = rentalPlaceJpaRepository.findWithLimit();
+        ModelMapper modelMapper = new ModelMapper();
 
-        List<RentalPlaceTO> to = new ArrayList<>();
+        return rentalPlaceJpaRepository.findWithLimit()
+                .stream()
+                .map(p -> {
+                    RentalPlaceTO rentalPlace = modelMapper.map(p, RentalPlaceTO.class);
+                    rentalPlace.setThumbnail(
+                            p.getThumbnail() != null ? p.getThumbnail() : "thumbnail_default.png"
+                    );
 
-        for (Object[] result : lists) {
-            RentalPlaceTO rentalPlaceTO = new RentalPlaceTO();
-            rentalPlaceTO.setId((Long) result[0]); // seq
-            rentalPlaceTO.setName((String) result[1]);                 // name
-            rentalPlaceTO.setPrice((BigDecimal) result[2]);            // price
-            rentalPlaceTO.setAddress((String) result[3]);              // address
-            rentalPlaceTO.setThumbnail(result[4] != null
-                    ? "/images/place_thumbnail/" + result[4]
-                    : null);                                           // thumbnail
-            to.add(rentalPlaceTO);
-        }
-
-        return to;
+                    return rentalPlace;
+                }).toList();
     }
 
     public RentalPlaceTO findById(Long id) {
 
-        RentalPlace rentalPlace = rentalPlaceJpaRepository.findById(id).get();
+        Optional<RentalPlace> rentalPlace = rentalPlaceJpaRepository.findById(id);
 
-        ModelMapper mapper = new ModelMapper();
-        RentalPlaceTO to = mapper.map(rentalPlace, RentalPlaceTO.class);
+        if (rentalPlace.isPresent()) {
+            RentalPlaceTO rentalPlaceTO = new ModelMapper().map(rentalPlace.get(), RentalPlaceTO.class);
+            rentalPlaceTO.setThumbnail(
+                    (rentalPlace.get().getThumbnail() != null ?
+                            rentalPlace.get().getThumbnail() : "thumbnail_default.png")
+            );
 
-        to.setThumbnail((rentalPlace.getThumbnail() != null
-                ? "/images/place_thumbnail/" + rentalPlace.getThumbnail() : null));
+            return rentalPlaceTO;
+        }
 
-        return to;
-    }
-
-    public RentalPlaceTO findDetailById(Long id) {
-        Object result = rentalPlaceJpaRepository.findDetailById(id);
-
-        Object[] objects = (Object[]) result;
-
-        RentalPlaceTO rentalPlaceTO = new RentalPlaceTO();
-        rentalPlaceTO.setZipcode((String) objects[0]);
-        rentalPlaceTO.setPrice((BigDecimal) objects[1]);
-        rentalPlaceTO.setAddress((String) objects[2]);
-        rentalPlaceTO.setAddrDetail((String) objects[3]);
-        rentalPlaceTO.setDescription((String) objects[4]);
-        rentalPlaceTO.setInfra((String) objects[5]);
-        rentalPlaceTO.setName((String) objects[6]);
-        rentalPlaceTO.setCapacity((String) objects[7]);
-        rentalPlaceTO.setNearbyAgeGroup((String) objects[8]);
-        rentalPlaceTO.setRegisteredAt((Instant) objects[9]);
-
-        return rentalPlaceTO;
+        return null;
     }
 
     public Page<RentalPlaceTO> findFilteredWithPagination(
             Integer minCapacity, Integer maxCapacity, String location,
-            BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+            BigDecimal minPrice, BigDecimal maxPrice,
+            LocalDate startDate, LocalDate endDate,
+            String sorting, Pageable pageable) {
+        ModelMapper modelMapper = new ModelMapper();
 
-        Page<Object[]> lists = rentalPlaceJpaRepository.findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, pageable);
-        System.out.println(lists);
-        System.out.println("Content: " + lists.getContent());
+        return rentalPlaceJpaRepository
+                .findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, startDate, endDate, sorting, pageable)
+                .map(rp -> {
+                    RentalPlaceTO rentalPlaceTO = modelMapper.map(rp, RentalPlaceTO.class);
+                    rentalPlaceTO.setThumbnail(rp.getThumbnail() != null ?
+                            rp.getThumbnail() : "thumbnail_default.png");
 
-//        rp.Capacity, rp.price, rp.name, rp.thumbnail, rp.registeredAt
-        Page<RentalPlaceTO> to = lists.map(objects -> {
-            RentalPlaceTO rentalPlaceTO = new RentalPlaceTO();
-            rentalPlaceTO.setCapacity((String) objects[0]);
-            rentalPlaceTO.setPrice((BigDecimal) objects[1]);
-            rentalPlaceTO.setName((String) objects[2]);
-            rentalPlaceTO.setThumbnail(objects[3] != null
-                    ? "/images/place_thumbnail/" + objects[3]
-                    : null);
-            rentalPlaceTO.setRegisteredAt((Instant) objects[4]);
-            return rentalPlaceTO;
-        });
-
-        return to;
+                    return rentalPlaceTO;
+                });
     }
 
-    public List<RentalPlaceImageListTO> findRentalPlaceImageList (Long id) {
+    public List<RentalPlaceImageTO> findRentalPlaceImageList (Long id) {
 
         List<RentalPlaceImageList> lists = rentalPlaceImageListJpaRepository.findRentalPlaceImageList(id);
 
-        List<RentalPlaceImageListTO> toList = new ArrayList<>();
+        List<RentalPlaceImageTO> toList = new ArrayList<>();
         for (RentalPlaceImageList result : lists) {
-            RentalPlaceImageListTO to = new RentalPlaceImageListTO();
+            RentalPlaceImageTO to = new RentalPlaceImageTO();
             to.setRentalPlaceSeq(result.getId().getRentalPlaceSeq());
             to.setImage("/images/place_details/" + result.getId().getImage());
             toList.add(to);
@@ -261,7 +236,7 @@ public class RentalPlaceServiceImpl {
         // 이미지 데이터 저장
         List<RentalPlaceImageList> lists = new ArrayList<>();
         if (images == null || images.isEmpty()) {
-            // 이미지가 없을 때 기본 이미지 추가
+            // 이미지가 없을 때 기본 이미지 추가 -> null로 적용.
             String defaultImageName = "thumbnail_default.png";
 
             RentalPlaceImageListId imageListId = new RentalPlaceImageListId();

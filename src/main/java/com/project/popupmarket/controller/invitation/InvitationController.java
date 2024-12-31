@@ -2,11 +2,12 @@ package com.project.popupmarket.controller.invitation;
 
 import com.project.popupmarket.dto.invitation.InvitationTO;
 import com.project.popupmarket.service.invitation.InvitationService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api")
 public class InvitationController {
 
     private final InvitationService invitationService;
@@ -16,6 +17,7 @@ public class InvitationController {
     }
 
     @PostMapping("/invitation")
+    @Operation(summary = "입점 요청 추가")
     public ResponseEntity<String> addInvitation(@RequestBody InvitationTO invitation) {
 
         boolean flag = invitationService.addInvitation(invitation);
@@ -42,6 +44,7 @@ public class InvitationController {
 //    }
 
     @DeleteMapping("/invitation")
+    @Operation(summary = "입점 요청 삭제")
     public ResponseEntity<String> removeInvitation(@RequestBody InvitationTO invitation) {
 
         boolean flag = invitationService.removeInvitation(invitation);
