@@ -68,6 +68,44 @@ function deleteCookie(name) {
 	document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
 
+function getRangeDate(startDate, endDate) {
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+
+	const sYear = start.getFullYear();
+	const sMonth = start.getMonth() + 1;
+	const sDay = start.getDate();
+
+	const eYear = end.getFullYear();
+	const eMonth = end.getMonth() + 1;
+	const eDay = end.getDate();
+	return `${sYear}년 ${sMonth < 10 ? '0' + sMonth : sMonth}월 ${sDay < 10 ? '0' + sDay : sDay}일 ~ ${eYear}년 ${eMonth < 10 ? '0' + eMonth : eMonth}월 ${eDay < 10 ? '0' + eDay : eDay}일`;
+}
+
+function createPriceSlider() {
+	let slider = document.getElementById('price-slider');
+
+	noUiSlider.create(slider, {
+		start: [10, 1000],
+		connect: true,
+		range: {
+			'min': 10,
+			'max': 1000
+		},
+		format: {
+			to: function (value) {
+					if(value >= 1000) return '제한 없음';
+					return Math.round(value) + '만원';
+			},
+			from: function (value) {
+					return Number(value.replace('만원', ''));
+			}
+		},
+	});
+}
+let priceRange = document.getElementById('price-range');
+
+
 // 인증 상태에 따른 UI 업데이트
 function updateAuthUI() {
 	const isAuthenticated = TokenUtil.hasToken();
@@ -178,6 +216,19 @@ function createMap() {
 	// 기존 코드 유지
 }
 
+
 function daumPostcode() {
 	// 기존 코드 유지
+
+					postcode.value = data.zonecode;
+					addr.value = roadAddr;
+			}
+	}).open();
+}
+
+function getPeriod(startDate, endDate){
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+
+	return (end - start) / (1000 * 3600 * 24) + 1;
 }
