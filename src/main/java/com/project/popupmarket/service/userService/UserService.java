@@ -8,24 +8,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Value("${app.default-profile-image}")
     private String defaultProfileImage;
 
     public Long save(UserRegisterDto dto) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
         return userRepository.save(User.builder()
                 .email(dto.getEmail())
-                .password(bCryptPasswordEncoder.encode(dto.getPassword()))
+                .password(encoder.encode(dto.getPassword()))
                 .brand(dto.getBrand())
                 .name(dto.getName())
                 .tel(dto.getTel())
-                .profile_image(defaultProfileImage)
+                .profileImage(defaultProfileImage)
                 .build()).getId();
     }
 
@@ -34,8 +37,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
     }
 
-    public Long delete(Long userId) {
-        userRepository.deleteById(userId);
-        return userId;
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
