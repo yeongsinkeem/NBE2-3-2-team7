@@ -218,38 +218,3 @@ function toggle() {
     eventBox.classList.toggle('bg-[#d8d7d7]');
     eventBox.classList.toggle('bg-[#3FB8AF]');
 }
-
-function checkCreateCalendar() {
-    // 기존 코드...
-}
-
-// 인증 상태에 따른 UI 업데이트
-function updateAuthUI() {
-    const isAuthenticated = TokenUtil.hasToken();
-    const loginButton = document.querySelector('#login-button');
-    const logoutButton = document.querySelector('#logout-button');
-    const myPageButton = document.querySelector('#mypage-button');
-
-    if (isAuthenticated) {
-        if (loginButton) loginButton.style.display = 'none';
-        if (logoutButton) logoutButton.style.display = 'block';
-        if (myPageButton) myPageButton.style.display = 'block';
-    } else {
-        if (loginButton) loginButton.style.display = 'block';
-        if (logoutButton) logoutButton.style.display = 'none';
-        if (myPageButton) myPageButton.style.display = 'none';
-    }
-}
-
-// 로그아웃 처리 함수
-function handleLogout() {
-    fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${TokenUtil.getToken()}`
-        }
-    }).finally(() => {
-        TokenUtil.removeToken();
-        window.location.href = '/';
-    });
-}
