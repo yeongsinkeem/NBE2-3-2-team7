@@ -8,6 +8,7 @@ const age = urlParams.get("targetAgeGroup");
 const start = urlParams.get("startDate");
 const end = urlParams.get("endDate");
 const sorting = urlParams.get("sorting");
+const page = urlParams.get("page");
 
 const params = new URLSearchParams();
 
@@ -17,6 +18,7 @@ if (age) params.append("targetAgeGroup", age);
 if (start) params.append("startDate", start);
 if (end) params.append("endDate", end);
 if (sorting) params.append("sorting", sorting);
+if (page) params.append("page", page);
 
 document.addEventListener('DOMContentLoaded', () => {
 	init()
@@ -29,9 +31,9 @@ function init() {
 	fetch(`/api/popup/list?${params.toString()}`)
 		.then(resp => resp.json())
 		.then(res => {
-			let result = '';
-			res.forEach(item => {
-				result += `<a class="group drop-shadow-lg relative p-4 border m-2 rounded-lg border-gray-300" href="/popup/detail/${item.id}">
+			let popup = '';
+			res.content.forEach(item => {
+				popup += `<a class="group drop-shadow-lg relative p-4 border m-2 rounded-lg border-gray-300" href="/popup/detail/${item.id}">
 			<div class="absolute w-full h-full bg-gray-300 opacity-0 group-hover:opacity-50 transition left-0 top-0"></div>
 			<div class="mt-2 block relative overflow-hidden rounded-lg border border-gray-400">
 				<img class="w-full size-40 object-cover bg-gray-100" src="/images/popup_thumbnail/${item.thumbnail}" alt="Project">
@@ -52,7 +54,7 @@ function init() {
 			</div>
 		</a>`
 			})
-			box.innerHTML = result;
+			box.innerHTML = popup;
 		})
 }
 
@@ -90,4 +92,13 @@ function findStore() {
 	if (sorted) findParams.append("sorting", sorted);
 
 	window.location.href = '/popup/list?' + findParams;
+}
+
+function setPage(page) {
+	if (urlParams.has("page")) {
+		urlParams.set("page", page);
+	} else {
+		urlParams.append("page", page);
+	}
+	window.location.href = urlParams.toString();
 }

@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,21 +79,18 @@ public class PopupStoreServiceImpl {
     }
 
     // 2 - 2. Read : 조건에 해당하는 팝업 미리보기
-    public List<PopupStoreTO> findByFilter(String targetLocation, String type, String targetAgeGroup, LocalDate startDate, LocalDate endDate, String sorting) {
+    public Page<PopupStoreTO> findByFilter(String targetLocation, String type, String targetAgeGroup, LocalDate startDate, LocalDate endDate, String sorting, Pageable pageable) {
         ModelMapper modelMapper = new ModelMapper();
 
         // 엔티티 -> TO로 매핑
         return popupStoreJpaRepository
-                .findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate, sorting)
-                .stream()
+                .findByFilter(targetLocation, type, targetAgeGroup, startDate, endDate, sorting, pageable)
                 .map(p -> {
                     PopupStoreTO to = modelMapper.map(p, PopupStoreTO.class);
-                    if (to.getThumbnail() == null) {
-                        to.setThumbnail("thumbnail_default.png");
-                    }
+                    if (to.getThumbnail() == null) to.setThumbnail("thumbnail_default.png");
+
                     return to;
-                })
-                .toList();
+                });
     }
 
     // 2 - 3. Read : 사용자가 등록한 팝업 목록 보기
@@ -103,9 +102,24 @@ public class PopupStoreServiceImpl {
                 .stream()
                 .map(p -> {
                     PopupStoreTO to = modelMapper.map(p, PopupStoreTO.class);
-                    if (to.getThumbnail() == null) {
-                        to.setThumbnail("thumbnail_default.png");
-                    }
+                    if (to.getThumbnail() == null) to.setThumbnail("thumbnail_default.png");
+
+                    return to;
+                })
+                .toList();
+    }
+
+    // 2 - 4. Read : 메인 페이지 팝업 10개 조회
+    public List<PopupStoreTO> findByLimit() {
+        ModelMapper modelMapper = new ModelMapper();
+
+        return popupStoreJpaRepository
+                .findByLimit()
+                .stream()
+                .map(p -> {
+                    PopupStoreTO to = modelMapper.map(p, PopupStoreTO.class);
+                    if (to.getThumbnail() == null) to.setThumbnail("thumbnail_default.png");
+
                     return to;
                 })
                 .toList();

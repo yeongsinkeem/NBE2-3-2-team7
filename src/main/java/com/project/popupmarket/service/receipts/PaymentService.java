@@ -118,18 +118,17 @@ public class PaymentService {
     }
 
     @Transactional
-    public int deleteStagingPayment(ReceiptTO receipt) {
-        int statusCode = 400;
+    public boolean deleteStagingPayment(ReceiptTO receipt) {
         Optional<StagingPayment> stagingPaymentOptional = stagingPaymentRepository.findById(receipt.getOrderId());
 
         if (stagingPaymentOptional.isPresent()) {
             StagingPayment stagingPayment = stagingPaymentOptional.get();
 
             stagingPaymentRepository.delete(stagingPayment);
-            statusCode = 200;
+            return true;
         }
 
-        return statusCode;
+        return false;
     }
 
     public List<ReceiptInfoTO> getReceiptsByPlaceSeq(Long placeSeq) {

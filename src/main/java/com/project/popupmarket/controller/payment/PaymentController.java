@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.popupmarket.dto.payment.*;
 import com.project.popupmarket.service.receipts.PaymentService;
 import com.project.popupmarket.service.receipts.TossRequestService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -27,6 +28,7 @@ public class PaymentController {
     }
 
     @GetMapping("/payment")
+    @Operation(summary = "임대지 및 예약자 정보 조회")
     public ResponseEntity<ReservationInfoTO> reservationInfo(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestParam Long seq,
@@ -54,6 +56,7 @@ public class PaymentController {
     }
 
     @PostMapping("/payment")
+    @Operation(summary = "임시 결제 내역 추가")
     public ResponseEntity<String> payment(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody ReceiptTO receipt
@@ -72,6 +75,7 @@ public class PaymentController {
     }
 
     @PostMapping("/payment/success")
+    @Operation(summary = "결제 승인 요청 및 영수증 추가")
     public ResponseEntity<String> paymentSuccess(
 //            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody TossPaymentTO payment
@@ -105,22 +109,20 @@ public class PaymentController {
     }
 
     @DeleteMapping("/payment/fail")
+    @Operation(summary = "결제 실패, 임시 결제 내역 삭제")
     public ResponseEntity<String> paymentFail(
-//            @RequestHeader("Authorization") String token, 추후 수정 예정
             @RequestBody ReceiptTO receipt
     ) {
-//        Long userId = Long.parseLong(jwtTokenProvider.extractUserId(token.replace("Bearer ", "")));
-//        reservation.setUserSeq(userId);
-
-        int statusCode = paymentService.deleteStagingPayment(receipt);
-        if (statusCode == 200) {
+        boolean flag = paymentService.deleteStagingPayment(receipt);
+        if (flag) {
             return ResponseEntity.ok("success");
         } else {
-            return ResponseEntity.status(statusCode).body("fail");
+            return ResponseEntity.status(500).body("fail");
         }
     }
 
     @GetMapping("/receipt")
+    @Operation(summary = "사용자 결제 내역 리스트 조회")
     public ResponseEntity<List<ReceiptInfoTO>> receipt(/*@RequestHeader("Authorization") String token*/) {
         Long userId = 1L;
 
@@ -134,6 +136,7 @@ public class PaymentController {
     }
 
     @GetMapping("/reservation/{rentalPlaceSeq}")
+    @Operation(summary = "임대지 예약 리스트 조회")
     public ResponseEntity<List<ReceiptInfoTO>> reservation(@PathVariable Long rentalPlaceSeq) {
         List<ReceiptInfoTO> receipts = paymentService.getReceiptsByPlaceSeq(rentalPlaceSeq);
 
@@ -145,6 +148,7 @@ public class PaymentController {
     }
 
     @PutMapping("/receipt/{orderId}")
+    @Operation(summary = "임대지 결제 환불")
     public ResponseEntity<String> receipt(
             /*@RequestHeader("Authorization") String token*/
             @PathVariable String orderId
@@ -164,6 +168,7 @@ public class PaymentController {
 
     // 임대지 기능과 병합시 삭제
     @GetMapping("/test/date")
+    @Operation(summary = "임대지 예약 기간 목록 호출")
     public ResponseEntity<List<RangeDateTO>> getRangeDates (@RequestParam Long placeSeq) {
 
         List<RangeDateTO> rangeDates = paymentService.getRangeDates(placeSeq);
