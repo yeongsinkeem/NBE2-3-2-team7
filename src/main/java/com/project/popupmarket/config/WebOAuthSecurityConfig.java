@@ -1,12 +1,15 @@
 package com.project.popupmarket.config;
 
+import com.project.popupmarket.config.handler.BaseAuthenticationSuccessHandler;
+import com.project.popupmarket.config.handler.FormLoginSuccessHandler;
 import com.project.popupmarket.config.jwt.TokenAuthenticationFilter;
 import com.project.popupmarket.config.jwt.TokenProvider;
-import com.project.popupmarket.config.oauth.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.project.popupmarket.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import com.project.popupmarket.config.handler.OAuth2SuccessHandler;
-import com.project.popupmarket.config.oauth.OAuth2UserCustomService;
+import com.project.popupmarket.service.userService.OAuth2UserCustomService;
 import com.project.popupmarket.repository.JwtTokenRepository;
 import com.project.popupmarket.service.userService.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +35,7 @@ public class WebOAuthSecurityConfig {
     private final JwtTokenRepository jwtTokenRepository;
     private final UserService userService;
 
+    // WebSecurityCustomizer 빈 등록
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
@@ -39,6 +43,7 @@ public class WebOAuthSecurityConfig {
                 .requestMatchers("/static/**");
     }
 
+    // SecurityFilterChain 빈 등록
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -53,17 +58,7 @@ public class WebOAuthSecurityConfig {
         // JWT 필터 추가
         http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
-        // 폼 로그인 설정 추가
-        http.formLogin(formLogin -> formLogin
-                .loginPage("/login")
-                .usernameParameter("email")    // 로그인 폼에서 사용할 파라미터명
-                .passwordParameter("password")
-                .loginProcessingUrl("/api/login")  // 로그인 처리 URL
-                .defaultSuccessUrl("/main")
-                .failureUrl("/login?error=true")
-                .permitAll()
-        );
-
+        // API 요청에 대한 권한 설정
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
                         // API 엔드포인트 설정
@@ -76,9 +71,9 @@ public class WebOAuthSecurityConfig {
                         .requestMatchers(antMatcher("/popup/list")).permitAll()
                         .requestMatchers(antMatcher("/rental/detail/**")).permitAll()
                         .requestMatchers(antMatcher("/popup/detail/**")).permitAll()
-                        .requestMatchers(antMatcher("/register")).permitAll()
+                        .requestMatchers(antMatcher("/register/**")).permitAll()
                         .requestMatchers(antMatcher("/login/**")).permitAll()
-                        .requestMatchers("/user").permitAll()
+                        .requestMatchers("/signup").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()
 
@@ -90,22 +85,45 @@ public class WebOAuthSecurityConfig {
                         .anyRequest().permitAll()
         );
 
-        http.oauth2Login(oauth2Login ->
-                oauth2Login
-                        .loginPage("/login")
-                        .authorizationEndpoint(authorizationEndpoint ->
-                                authorizationEndpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository()))
-                        .successHandler(oAuth2SuccessHandler())
-                        .userInfoEndpoint(userInfoEndpoint ->
-                                userInfoEndpoint.userService(oAuth2UserCustomService)));
+        // 폼 로그인 설정
+        http.formLogin(formLogin -> formLogin
+                .loginPage("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .loginProcessingUrl("/api/login")
+                .successHandler(formLoginSuccessHandler())
+                .failureHandler((request, response, exception) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"" + exception.getMessage() + "\"}");
+                })
+                .permitAll()
+        );
 
-        http.logout(logout ->
-                logout
-                        .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID"));
+        // OAuth2 로그인 설정
+        http.oauth2Login(oauth2Login -> oauth2Login
+                .loginPage("/login")
+                .authorizationEndpoint(endpoint ->
+                        endpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
+                )
+                .successHandler(oAuth2SuccessHandler())
+                .userInfoEndpoint(endpoint ->
+                        endpoint.userService(oAuth2UserCustomService)
+                )
+        );
 
+        // 로그아웃 설정
+        http.logout(logout -> logout
+                .logoutUrl("/api/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
+                .invalidateHttpSession(true)
+                .deleteCookies(BaseAuthenticationSuccessHandler.JWT_TOKEN_COOKIE_NAME)
+        );
+
+
+        // 예외 처리 핸들링
         http.exceptionHandling(exceptionHandling ->
                 exceptionHandling
                         .defaultAuthenticationEntryPointFor(
@@ -115,6 +133,7 @@ public class WebOAuthSecurityConfig {
         return http.build();
     }
 
+    // OAuth2 로그인 성공 핸들러 추가
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
         return new OAuth2SuccessHandler(tokenProvider,
@@ -123,16 +142,24 @@ public class WebOAuthSecurityConfig {
                 userService);
     }
 
+    // 폼 로그인 성공 핸들러 추가
+    @Bean
+    public FormLoginSuccessHandler formLoginSuccessHandler() {
+        return new FormLoginSuccessHandler(tokenProvider, jwtTokenRepository);
+    }
+
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter() {
         return new TokenAuthenticationFilter(tokenProvider);
     }
 
+    // OAuth2AuthorizationRequestBasedOnCookieRepository 빈 등록
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
     }
 
+    // BCryptPasswordEncoder 빈 등록
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();

@@ -1,4 +1,4 @@
-package com.project.popupmarket.config.oauth;
+package com.project.popupmarket.repository;
 
 import com.project.popupmarket.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
