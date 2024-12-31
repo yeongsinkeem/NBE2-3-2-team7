@@ -8,12 +8,15 @@ import com.project.popupmarket.repository.OAuth2AuthorizationRequestBasedOnCooki
 import com.project.popupmarket.config.handler.OAuth2SuccessHandler;
 import com.project.popupmarket.service.userService.OAuth2UserCustomService;
 import com.project.popupmarket.repository.JwtTokenRepository;
+import com.project.popupmarket.service.userService.UserDetailService;
 import com.project.popupmarket.service.userService.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -33,6 +36,7 @@ public class WebOAuthSecurityConfig {
     private final OAuth2UserCustomService oAuth2UserCustomService;
     private final TokenProvider tokenProvider;
     private final JwtTokenRepository jwtTokenRepository;
+    private final UserDetailService userDetailService;
     private final UserService userService;
 
     // WebSecurityCustomizer 빈 등록
@@ -69,6 +73,7 @@ public class WebOAuthSecurityConfig {
                         .requestMatchers(antMatcher("/")).permitAll()
                         .requestMatchers(antMatcher("/main")).permitAll()
                         .requestMatchers(antMatcher("/popup/list")).permitAll()
+                        .requestMatchers(antMatcher("/rental/list")).permitAll()
                         .requestMatchers(antMatcher("/rental/detail/**")).permitAll()
                         .requestMatchers(antMatcher("/popup/detail/**")).permitAll()
                         .requestMatchers(antMatcher("/register/**")).permitAll()
@@ -78,7 +83,6 @@ public class WebOAuthSecurityConfig {
                         .requestMatchers("/login/oauth2/**").permitAll()
 
                         // 로그인 필요한 페이지
-                        .requestMatchers(antMatcher("/rental/list")).authenticated()
                         .requestMatchers(antMatcher("/mypage/**")).authenticated()
                         .requestMatchers(antMatcher("/payment")).authenticated()
 
@@ -88,9 +92,9 @@ public class WebOAuthSecurityConfig {
         // 폼 로그인 설정
         http.formLogin(formLogin -> formLogin
                 .loginPage("/login")
-                .usernameParameter("username")
+                .usernameParameter("email")
                 .passwordParameter("password")
-                .loginProcessingUrl("/api/login")
+                .loginProcessingUrl("/login")
                 .successHandler(formLoginSuccessHandler())
                 .failureHandler((request, response, exception) -> {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -159,9 +163,17 @@ public class WebOAuthSecurityConfig {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(userDetailService).passwordEncoder(bCryptPasswordEncoder);
+        return authenticationManagerBuilder.build();
+    }
+
     // BCryptPasswordEncoder 빈 등록
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

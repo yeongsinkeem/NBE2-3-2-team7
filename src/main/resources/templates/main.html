@@ -167,6 +167,22 @@
     </section>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-</body>
 
+<!-- Add the authentication buttons here -->
+<div class="items-center justify-end md:flex md:flex-1 lg:w-0">
+    <a href="/login" id="login-button"
+       class="ml-8 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-[#3FB8AF] px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-[#2c817c]">
+        로그인
+    </a>
+    <button id="logout-button" onclick="handleLogout()" style="display: none"
+            class="ml-8 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-[#3FB8AF] px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-[#2c817c]">
+        로그아웃
+    </button>
+    <a href="/mypage" id="mypage-button" style="display: none"
+       class="ml-8 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-[#3FB8AF] px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-[#2c817c]">
+        마이페이지
+    </a>
+</div>
+
+</body>
 </html>
