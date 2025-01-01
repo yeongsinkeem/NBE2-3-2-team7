@@ -9,34 +9,28 @@ const age = document.getElementById('target-age');
 const area = document.getElementById('target-area');
 const description = document.getElementById('popup-description');
 
+const myPlace = document.getElementById('my-place');
+
 window.addEventListener('DOMContentLoaded', ()=> {
 	init();
 })
 
 function init() {
-	fetch(`/api/popup/${popupSeq}`)
+	fetch(`/api/popup/bundle/${popupSeq}`)
 		.then(resp=> resp.json())
 		.then(res => {
-			let result = '';
-			if (res.images.length > 0) {
-				res.images.forEach((image) => {
-					result += `<div class="w-full h-full flex-shrink-0">
-					<img src="/images/popup_detail_images/${image}" class="mx-auto h-full w-full object-cover" alt="">
-				</div>`
+			if (res.userRentalPlace.length >= 1) {
+				let placeInsert = '';
+				res.userRentalPlace.forEach((place) => {
+					placeInsert += `<option value="${place.id}">${place.name}</option>`
 				})
+
+				myPlace.innerHTML = placeInsert;
 			} else {
-				imagesBox.innerHTML = `<div class="w-full h-full flex-shrink-0">
-					<img src="" class="mx-auto h-full w-full object-cover" alt="">
-				</div>`;
+				myPlace.innerHTML = '<option value="">없음</option>'
 			}
 
-			title.innerHTML = res.popupStore.title;
-			place.innerHTML = res.popupStore.targetLocation;
-			type.innerHTML = res.popupStore.type;
-			rentalDate.innerHTML = `${res.popupStore.startDate} ~ ${res.popupStore.endDate}`;
-			age.innerHTML = res.popupStore.targetAgeGroup;
-			description.innerHTML = res.popupStore.description;
-
+			renderPopupInfo(res.data);
 			slideImage();
 		})
 		.catch(err => console.log(err));
@@ -72,5 +66,52 @@ function slideImage() {
 
 	function moveSlide(slides, index) {
 		slides.style.transform = `translateX(-${index * 100}%)`;
+	}
+}
+
+function renderPopupInfo(data) {
+	let result = '';
+	if (data.images.length > 0) {
+		data.images.forEach((image) => {
+			result += `<div class="w-full h-full flex-shrink-0">
+						<img src="/images/popup_detail/${image}" class="mx-auto h-full w-full object-cover" alt="">
+					</div>`
+		})
+		imagesBox.innerHTML = result;
+	} else {
+		imagesBox.innerHTML = `<div class="w-full h-full flex-shrink-0">
+						<img src="" class="mx-auto h-full w-full object-cover" alt="">
+					</div>`;
+	}
+
+	title.innerHTML = data.popupStore.title;
+	place.innerHTML = data.popupStore.targetLocation;
+	type.innerHTML = data.popupStore.type;
+	rentalDate.innerHTML = `${data.popupStore.startDate} ~ ${data.popupStore.endDate}`;
+	age.innerHTML = data.popupStore.targetAgeGroup;
+	area.innerHTML = data.popupStore.wishArea;
+	description.innerHTML = data.popupStore.description;
+}
+
+function invitation() {
+	if (myPlace.value) {
+		fetch(`/api/invitation`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				"popupStoreSeq": popupSeq,
+				"rentalPlaceSeq": myPlace.value
+			})
+		})
+			.then(resp => {
+				if (resp.ok) {
+					window.location.reload();
+				}
+			})
+			.catch(err => console.log(err));
+	} else {
+		alert('잘못된 요청입니다.')
 	}
 }

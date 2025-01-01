@@ -20,7 +20,23 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
 
     @Query("SELECT rp.id, rp.thumbnail, rp.address, rp.name, rp.status " +
             "FROM RentalPlace rp WHERE rp.rentalUserSeq.id = :userId")
-    List<Object[]> findRentalPlacesByUserId(@Param("userId") Long userId);
+    List<RentalPlace> findRentalPlacesByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT rp " +
+            "FROM RentalPlace rp " +
+            "WHERE rp.rentalUserSeq.id = :userId " +
+            "AND rp.status = 'ACTIVE'" +
+            "AND NOT EXISTS ( " +
+            "    SELECT 1 " +
+            "    FROM PlaceRequest pr " +
+            "    WHERE pr.rentalPlaceSeq.id = rp.id " +
+            "    AND pr.popupStoreSeq.id = :popupId" +
+            ")")
+    List<RentalPlace> findActivatedRentalPlacesByUserId(
+            @Param("userId") Long userId,
+            @Param("popupId") Long popupId
+    );
+
 
     @Query(value = "SELECT rp " +
             "FROM RentalPlace rp " +

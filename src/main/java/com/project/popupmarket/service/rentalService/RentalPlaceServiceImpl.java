@@ -2,6 +2,7 @@ package com.project.popupmarket.service.rentalService;
 
 import com.project.popupmarket.dto.rentalDto.RentalPlaceImageTO;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
+import com.project.popupmarket.dto.rentalDto.UserRentalPlaceInfoTO;
 import com.project.popupmarket.entity.RentalPlace;
 import com.project.popupmarket.entity.RentalPlaceImageList;
 import com.project.popupmarket.entity.RentalPlaceImageListId;
@@ -92,7 +93,7 @@ public class RentalPlaceServiceImpl {
         for (RentalPlaceImageList result : lists) {
             RentalPlaceImageTO to = new RentalPlaceImageTO();
             to.setRentalPlaceSeq(result.getId().getRentalPlaceSeq());
-            to.setImage("/images/place_details/" + result.getId().getImage());
+            to.setImage(result.getId().getImage());
             toList.add(to);
         }
 
@@ -100,23 +101,27 @@ public class RentalPlaceServiceImpl {
     }
 
     public List<RentalPlaceTO> findRentalPlacesByUserId (Long id) {
-        List<Object[]> results = rentalPlaceJpaRepository.findRentalPlacesByUserId(id);
+        ModelMapper modelMapper = new ModelMapper();
 
-        List<RentalPlaceTO> toList = new ArrayList<>();
-        for (Object[] result : results) {
-            RentalPlaceTO to = new RentalPlaceTO();
-            to.setId((Long) result[0]);
-            to.setThumbnail(result[1] != null
-                    ? "/images/place_thumbnail/" + (String) result[1]
-                    : null);
-            to.setAddress((String) result[2]);
-            to.setName((String) result[3]);
-            to.setStatus((String) result[4]);
-            toList.add(to);
-        }
+        return rentalPlaceJpaRepository.findRentalPlacesByUserId(id)
+                .stream().map(rp -> {
+                    RentalPlaceTO to = modelMapper.map(rp, RentalPlaceTO.class);
+                    to.setThumbnail(rp.getThumbnail() != null ?
+                            rp.getThumbnail() : "thumbnail_default.png");
 
-        return toList;
+                    return to;
+                })
+                .toList();
     }
+
+    public List<UserRentalPlaceInfoTO> findUserRentalPlaceInfo (Long userSeq, Long popupSeq) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        return rentalPlaceJpaRepository.findActivatedRentalPlacesByUserId(userSeq, popupSeq)
+                .stream().map(rp -> modelMapper.map(rp, UserRentalPlaceInfoTO.class))
+                .toList();
+    }
+
     public int insertRentalPlace(RentalPlaceTO to, MultipartFile thumbnail){
         int flag=0;
         to.setRegisteredAt(Instant.now());
@@ -145,6 +150,7 @@ public class RentalPlaceServiceImpl {
 
         return flag;
     }
+
     @Transactional
     public int updateRentalPlaceStatus(Long id, String status) {
         int flag = 0;

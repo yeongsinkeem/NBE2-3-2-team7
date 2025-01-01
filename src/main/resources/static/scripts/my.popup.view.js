@@ -39,5 +39,8 @@ function deletePopupStore() {
 				window.location.href = '/mypage/popup';
 			}
 		})
-		.catch(err => console.log(err));
+		.catch(err => {
+			console.log(err)
+			window.location.href = '/mypage/popup';
+		});
 }

@@ -29,14 +29,14 @@ addForm.addEventListener('submit', (e) => {
 		"type": categoryInput.value,
 		"targetAgeGroup": ageInput.value,
 		"targetLocation": locationInput.value,
-		"wishArea": areaRangeInput.value,
+		"wishArea": areaRangeInput.innerHTML,
 		"description": descriptionInput.value,
 		"startDate": dateSplit[0],
 		"endDate": dateSplit[1],
 	}
 
 	formData.append("popupStore", new Blob([JSON.stringify(popupStore)], { type: "application/json" }));
-	if (currentThumbnail) formData.append("thimg", currentThumbnail);
+	if (currentThumbnail) formData.append("thumbnail", currentThumbnail);
 	currentImages.forEach(image => formData.append("images", image))
 
 	fetch(`/api/popup`, {

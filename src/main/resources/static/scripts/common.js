@@ -244,16 +244,16 @@ let endArea = 100;
 
 let calendarInstance = null;
 
-function createPickCalendar() {
+function createPickCalendar(range) {
 
-	if (calendarInstance) {
-		calendarInstance.destroy();
-	}
+	if (calendarInstance) calendarInstance.destroy();
+	if (!range) range = [];
 
 	calendarInstance = flatpickr('#quick-calendar', {
 		mode: "range",
 		dateFormat: "Y-m-d",
 		minDate: getTomorrow(),
+		disable: range,
 		locale: {
 			rangeSeparator: " ~ ",
 			weekdays: {
@@ -266,16 +266,6 @@ function createPickCalendar() {
 			},
 		}
 	});
-}
-
-function createMap() {
-	let container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
-	let options = { //지도를 생성할 때 필요한 기본 옵션
-		center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
-		level: 3 //지도의 레벨(확대, 축소 정도)
-	};
-
-	let map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
 }
 
 //본 예제에서는 도로명 주소 표기 방식에 대한 법령에 따라, 내려오는 데이터를 조합하여 올바른 주소를 구성하는 방법을 설명합니다.

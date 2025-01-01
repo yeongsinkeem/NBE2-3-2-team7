@@ -3,7 +3,9 @@ package com.project.popupmarket.controller.rentalController;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceImageTO;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceRespTO;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
+import com.project.popupmarket.dto.rentalDto.UserRentalPlaceInfoTO;
 import com.project.popupmarket.service.rentalService.RentalPlaceServiceImpl;
+import com.project.popupmarket.util.UserContextUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,8 @@ import java.util.Map;
 public class RentalPlaceController {
     @Autowired
     private RentalPlaceServiceImpl rentalPlaceService;
+    @Autowired
+    private UserContextUtil userContextUtil;
 
     @GetMapping("/rental/list")
     @Operation(summary = "조건에 해당하는 임대지 리스트")
@@ -68,9 +72,9 @@ public class RentalPlaceController {
     public ResponseEntity<List<RentalPlaceTO>> userRentalList(
 //            @RequestHeader
     ) {
-        Long id = 1L;
+        Long userSeq = userContextUtil.getUserId();
 
-        List<RentalPlaceTO> to = rentalPlaceService.findRentalPlacesByUserId(id);
+        List<RentalPlaceTO> to = rentalPlaceService.findRentalPlacesByUserId(userSeq);
 
         if (to.isEmpty()) { // 결과가 비어 있는 경우 204 No Content
             return ResponseEntity.noContent().build();
@@ -79,8 +83,8 @@ public class RentalPlaceController {
         return ResponseEntity.ok(to);
     }
 
-    @Operation(summary = "임대지 상태 변경 -> [ACTIVE, INACTIVE]")
     @PatchMapping("/rental/{id}")
+    @Operation(summary = "임대지 상태 변경 -> [ACTIVE, INACTIVE]")
     public ResponseEntity<Void> updateRentalStatus(
             @PathVariable("id") Long id,
             @RequestParam String status
@@ -97,6 +101,9 @@ public class RentalPlaceController {
             @RequestPart("thumbnail") MultipartFile thumbnail,
             @RequestPart("images") List<MultipartFile> images
     ) {
+        Long userSeq = userContextUtil.getUserId();
+
+        rentalPlaceTO.setRentalUserSeqId(userSeq);
 
         System.out.println("Rental Place: " + rentalPlaceTO);
         System.out.println("Thumbnail: " + thumbnail.getOriginalFilename());
@@ -121,7 +128,6 @@ public class RentalPlaceController {
 
         return ResponseEntity.ok(new RentalPlaceRespTO(to, imageTo));
     }
-
 
     @PutMapping("/rental/{id}")
     @Operation(summary = "개별 임대지 수정")
