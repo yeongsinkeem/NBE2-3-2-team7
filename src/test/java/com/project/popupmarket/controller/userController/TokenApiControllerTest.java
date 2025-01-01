@@ -67,7 +67,7 @@ class TokenApiControllerTest {
                 .brand("testBrand")
                 .tel("010-1234-1234")
                 .name("Test User")
-                .profile_image("defaultProfileImage")
+                .profileImage("defaultProfileImage")
                 .build());
 
         String refreshToken = JwtFactory.builder()

@@ -2,15 +2,14 @@ package com.project.popupmarket.config;
 
 import com.project.popupmarket.config.handler.BaseAuthenticationSuccessHandler;
 import com.project.popupmarket.config.handler.FormLoginSuccessHandler;
+import com.project.popupmarket.config.handler.OAuth2SuccessHandler;
 import com.project.popupmarket.config.jwt.TokenAuthenticationFilter;
 import com.project.popupmarket.config.jwt.TokenProvider;
-import com.project.popupmarket.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.project.popupmarket.config.handler.OAuth2SuccessHandler;
-import com.project.popupmarket.service.userService.OAuth2UserCustomService;
 import com.project.popupmarket.repository.JwtTokenRepository;
+import com.project.popupmarket.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.project.popupmarket.service.oAuthService.OAuth2UserCustomService;
 import com.project.popupmarket.service.userService.UserDetailService;
 import com.project.popupmarket.service.userService.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,17 +55,13 @@ public class WebOAuthSecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.sessionManagement(sessionManagement ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
         // JWT 필터 추가
         http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         // API 요청에 대한 권한 설정
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
-                        // API 엔드포인트 설정
-                        .requestMatchers("/api/token").permitAll()
+                        .requestMatchers("/api/signup", "/api/login").permitAll()
                         .requestMatchers("/api/**").authenticated()
 
                         // 누구나 접근 가능한 페이지
@@ -77,8 +72,6 @@ public class WebOAuthSecurityConfig {
                         .requestMatchers(antMatcher("/rental/detail/**")).permitAll()
                         .requestMatchers(antMatcher("/popup/detail/**")).permitAll()
                         .requestMatchers(antMatcher("/register/**")).permitAll()
-                        .requestMatchers(antMatcher("/login/**")).permitAll()
-                        .requestMatchers("/signup").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()
 
@@ -96,43 +89,27 @@ public class WebOAuthSecurityConfig {
                 .passwordParameter("password")
                 .loginProcessingUrl("/login")
                 .successHandler(formLoginSuccessHandler())
-                .failureHandler((request, response, exception) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"error\":\"" + exception.getMessage() + "\"}");
-                })
                 .permitAll()
         );
 
         // OAuth2 로그인 설정
-        http.oauth2Login(oauth2Login -> oauth2Login
+        http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
-                .authorizationEndpoint(endpoint ->
-                        endpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
+                .authorizationEndpoint(authorization -> authorization
+                        .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
                 )
                 .successHandler(oAuth2SuccessHandler())
-                .userInfoEndpoint(endpoint ->
-                        endpoint.userService(oAuth2UserCustomService)
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(oAuth2UserCustomService)
                 )
         );
 
-        // 로그아웃 설정
-        http.logout(logout -> logout
-                .logoutUrl("/api/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                })
-                .invalidateHttpSession(true)
-                .deleteCookies(BaseAuthenticationSuccessHandler.JWT_TOKEN_COOKIE_NAME)
+        http.exceptionHandling(exception -> exception
+                .defaultAuthenticationEntryPointFor(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        new AntPathRequestMatcher("/api/**")
+                )
         );
-
-
-        // 예외 처리 핸들링
-        http.exceptionHandling(exceptionHandling ->
-                exceptionHandling
-                        .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                                new AntPathRequestMatcher("/api/**")));
 
         return http.build();
     }
@@ -152,6 +129,7 @@ public class WebOAuthSecurityConfig {
         return new FormLoginSuccessHandler(tokenProvider, jwtTokenRepository);
     }
 
+    // TokenAuthenticationFilter 빈 등록
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter() {
         return new TokenAuthenticationFilter(tokenProvider);
@@ -163,17 +141,16 @@ public class WebOAuthSecurityConfig {
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
     }
 
+    // AuthenticationManager 빈 등록
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userDetailService).passwordEncoder(bCryptPasswordEncoder);
         return authenticationManagerBuilder.build();
     }
-
     // BCryptPasswordEncoder 빈 등록
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

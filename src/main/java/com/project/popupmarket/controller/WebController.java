@@ -33,11 +33,6 @@ public class WebController {
         return "popup_detail";
     }
 
-    @GetMapping("mypage")
-    public String mypage() {
-        return "mypage";
-    }
-
     @GetMapping("mypage/rental")
     public String mypageRental() {
         return "my_place_list";
