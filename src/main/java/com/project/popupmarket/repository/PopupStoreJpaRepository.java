@@ -47,6 +47,10 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             "ORDER BY p.registeredAt DESC")
     List<PopupStore> findByUserSeq(@Param("userSeq") Long userSeq);
 
+    @Query("SELECT p.id FROM PopupStore p " +
+            "ORDER BY p.id DESC LIMIT 1")
+    Long findLastSeq();
+
     @Modifying
     @Query("UPDATE PopupStore p " +
             "SET p.type = COALESCE(:type, p.type), " +

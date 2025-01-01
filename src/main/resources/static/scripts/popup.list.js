@@ -49,7 +49,7 @@ function init() {
 						<h3 class="text-lg font-semibold text-gray-900">${item.title}</h3>
 						<h3 class="font-semibold text-gray-900">${item.startDate} ~ ${item.endDate}</h3>
 						<div class="flex justify-between">
-							<span>${item.wishArea} 평</span>
+							<span>${item.wishArea}</span>
 							<span>${item.type}</span>
 						</div>
 					</div>

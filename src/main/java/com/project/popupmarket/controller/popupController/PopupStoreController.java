@@ -6,6 +6,7 @@ import com.project.popupmarket.repository.PopupStoreImageJpaRepository;
 import com.project.popupmarket.repository.PopupStoreJpaRepository;
 import com.project.popupmarket.service.popupService.PopupStoreFileStorageService;
 import com.project.popupmarket.service.popupService.PopupStoreServiceImpl;
+import com.project.popupmarket.util.UserContextUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -37,43 +36,49 @@ public class PopupStoreController {
     private PopupStoreFileStorageService popupStoreFileStorageService;
     @Autowired
     private PopupStoreImageJpaRepository popupStoreImageJpaRepository;
+    @Autowired
+    private UserContextUtil userContextUtil;
 
     // [ CREATE ]
     @PostMapping(value = "/popup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "팝업스토어 추가")
     public ResponseEntity<String> createPopup(
             @RequestPart("popupStore") PopupStoreTO popupStore,
-            @RequestPart("thumbnail") MultipartFile thimg,
-            @RequestPart("images") List<MultipartFile> images
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thimg,
+            @RequestPart( "images") List<MultipartFile> images
     ) {
-
-
         try {
-            long userSeq = 1L;
+            long userSeq = userContextUtil.getUserId();
 
             List<String> imgNames = new ArrayList<>();
-            long popupCount = popupStoreJpaRepository.count();
+            long popupSeq = popupStoreJpaRepository.findLastSeq();
+
+            popupStore.setPopup_user_seq(userSeq);
 
             // 1. 썸네일 이미지 저장
-            String thPath = "src/main/resources/static/images/popup_thumbnail";
 
-            // 썸네일 파일 이름 지정
-            String originalFilename = thimg.getOriginalFilename();
-            String thPath2 = "images/popup_thumbnail/";
-            String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
-            String thumbNailFileName = "popup_" + (popupCount + 1) + "_" + (userSeq) + "_thumbnail." + ext;
+            String thumbNailFileName = null;
 
-            popupStoreFileStorageService.storeFile(thimg, thPath, thumbNailFileName);
+            if (thimg != null) {
+                String thPath = "C:/popupmarket/popup_thumbnail";
+
+                // 썸네일 파일 이름 지정
+                String originalFilename = thimg.getOriginalFilename();
+                String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+                thumbNailFileName = "popup_" + (popupSeq + 1) + "_" + (userSeq) + "_thumbnail." + ext;
+
+                popupStoreFileStorageService.storeFile(thimg, thPath, thumbNailFileName);
+            }
 
             // 2. 상세 이미지 저장
-            String imagesPath = "src/main/resources/static/images/popup_detail";
+            String imagesPath = "C:/popupmarket/popup_detail";
 
             int i = 1;
             for (MultipartFile img : images) {
                 // 파일 이름 지정
                 String imgOriginalFilename = img.getOriginalFilename();
                 String ext2 = imgOriginalFilename.substring(imgOriginalFilename.lastIndexOf(".") + 1);
-                String imgFileName = "popup_" + (popupCount + 1) + "_" + (userSeq) + "_images_" + i + "." + ext2;
+                String imgFileName = "popup_" + (popupSeq + 1) + "_" + (userSeq) + "_images_" + i + "." + ext2;
 
                 // 파일 저장
                 popupStoreFileStorageService.storeFile(img, imagesPath, imgFileName);
@@ -82,9 +87,9 @@ public class PopupStoreController {
                 i ++;
             }
             // 3. 팝업, 썸네일, 상세 이미지 DB 삽입
-            int flag = popupStoreServiceImpl.insert(popupStore, thPath2 + thumbNailFileName, imgNames);
+            boolean flag = popupStoreServiceImpl.insert(popupStore, thumbNailFileName, imgNames);
 
-            if (flag == 0) {
+            if (flag) {
                 return new ResponseEntity<>("팝업스토어가 성공적으로 추가되었습니다.", HttpStatus.CREATED);
             } else {
                 return new ResponseEntity<>("팝업스토어 추가에 실패했습니다.", HttpStatus.BAD_REQUEST);
@@ -131,7 +136,7 @@ public class PopupStoreController {
     @GetMapping("/popup/user")
     @Operation(summary = "사용자 팝업 리스트")
     public List<PopupStoreTO> getPopupByUser() {
-        Long userSeq = 1L;
+        Long userSeq = userContextUtil.getUserId();
         return popupStoreServiceImpl.findByUserSeq(userSeq);
     }
 
@@ -145,10 +150,12 @@ public class PopupStoreController {
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
         try {
+            Long userSeq = userContextUtil.getUserId();
+
             // 1. 팝업스토어 업데이트
-            int thCount = popupStoreServiceImpl.updatePopup(seq, popupStore, thimg); // updatePopup 메서드는 int 반환
+            int thCount = popupStoreServiceImpl.updatePopup(seq, userSeq, popupStore, thimg); // updatePopup 메서드는 int 반환
             // 2. 팝업스토어 이미지 업데이트
-            int imgsCount = popupStoreServiceImpl.updatePopupImgs(seq, images);
+            int imgsCount = popupStoreServiceImpl.updatePopupImgs(seq, userSeq, images);
 
             // 3. 응답 생성
             System.out.println("팝업스토어 업데이트 : " + thCount);
@@ -167,9 +174,9 @@ public class PopupStoreController {
     @DeleteMapping("/popup/{seq}")
     @Operation(summary = "개별 팝업 삭제")
     public ResponseEntity<String> deletePopup(@PathVariable long seq) {
-        int result = popupStoreServiceImpl.delete(seq);
+        boolean flag = popupStoreServiceImpl.delete(seq);
 
-        if (result == 1) {
+        if (flag) {
             return ResponseEntity.ok("팝업이 성공적으로 삭제되었습니다.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
