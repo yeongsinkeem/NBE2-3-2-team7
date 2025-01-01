@@ -91,7 +91,7 @@ function renderImages() {
 		reader.onload = e => {
 			const li = document.createElement("li");
 			li.className = "flex items-center space-x-4 px-8 py-2 hover:bg-gray-200";
-			li.innerHTML = `<img src="${e.target.result}" class="w-20 h-20 border border-gray-300 object-contain bg-gray-300">
+			li.innerHTML = `<img src="${e.target.result}" class="w-20 h-20 border border-gray-300 object-contain bg-gray-300" alt="">
 								<span class="text-xs font-bold flex-1">${file.name}</span>
 								<button type="button" onclick="removeImage(${index})">&#10060;</button>`;
 			imagesBox.appendChild(li);

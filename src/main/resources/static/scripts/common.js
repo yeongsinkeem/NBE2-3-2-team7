@@ -48,6 +48,7 @@ function deleteCookie(name) {
 	document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
 
+
 // 인증이 필요한 페이지 체크
 function checkAuthRequired() {
 	const path = window.location.pathname;
@@ -61,6 +62,7 @@ function checkAuthRequired() {
 	}
 	return true;
 }
+
 
 // 인증 상태에 따른 UI 업데이트
 function updateAuthUI() {

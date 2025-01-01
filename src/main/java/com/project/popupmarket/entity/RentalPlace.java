@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "rentalPlace")
 public class RentalPlace {
     @Id
@@ -30,9 +32,9 @@ public class RentalPlace {
     @Column(name = "thumbnail")
     private String thumbnail;
 
-    @Size(max = 255)
-    @Column(name = "area")
-    private String area;
+    @Size(min = 5, max = 5)
+    @Column(name = "zipcode", length = 5, nullable = false)
+    private String zipcode;
 
     @Column(name = "price", precision = 10)
     private BigDecimal price;
@@ -77,9 +79,6 @@ public class RentalPlace {
 
     @OneToMany(mappedBy = "rentalPlaceSeq", cascade = CascadeType.ALL)
     private Set<PlaceRequest> popupStores = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "rentalPlaceSeq")
-    private Set<Receipt> receipts = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "rentalPlaceSeq")
     private Set<RentalPlaceImageList> rentalPlaceImageLists = new LinkedHashSet<>();
