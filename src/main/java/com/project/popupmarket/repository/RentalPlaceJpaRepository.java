@@ -33,7 +33,17 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
             "   WHERE r.rentalPlaceSeq = rp.id " +
             "   AND (r.startDate <= :endDate AND r.endDate >= :startDate) " +
             "   AND r.reservationStatus != 'CANCELED'" +
-            ")")
+            ")" +
+            "ORDER BY " +
+            "CASE WHEN :sorting = 'registered_desc' THEN rp.registeredAt END DESC, " +
+            "CASE WHEN :sorting = 'registered_asc' THEN rp.registeredAt END ASC, " +
+            "CASE WHEN :sorting = 'area_desc' THEN rp.capacity END DESC, " +
+            "CASE WHEN :sorting = 'area_asc' THEN rp.capacity END ASC, " +
+            "CASE WHEN :sorting = 'price_desc' THEN rp.price END DESC, " +
+            "CASE WHEN :sorting = 'price_asc' THEN rp.price END ASC, " +
+            "CASE WHEN :sorting IS NULL OR :sorting = '' THEN rp.registeredAt END DESC," +
+            "CASE WHEN :sorting NOT IN ('registered_desc', 'registered_asc') THEN rp.registeredAt END DESC"
+        )
     Page<RentalPlace> findFilteredWithPagination(
             @Param("minCapacity") Integer  minCapacity,
             @Param("maxCapacity") Integer  maxCapacity,
