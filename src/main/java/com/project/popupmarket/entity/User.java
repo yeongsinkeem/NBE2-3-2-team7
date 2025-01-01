@@ -31,7 +31,7 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "name", unique = true)
+    @Column(name = "name")
     private String name;
 
 //    @Column(name = "social")
@@ -61,11 +61,10 @@ public class User implements UserDetails {
     }
 
     @Builder
-    public User(String email, String password, String name, String social, String brand, String tel, String profileImage, Map<String, String> attributes) {
+    public User(String email, String password, String name, String brand, String tel, String profileImage, Map<String, String> attributes) {
         this.email = email;
         this.password = password;
         this.name = name;
-//        this.social = social;
         this.brand = brand;
         this.tel = tel;
         this.profileImage = profileImage;

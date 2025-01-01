@@ -1,4 +1,4 @@
-package com.project.popupmarket.service.userService;
+package com.project.popupmarket.service.oAuthService;
 
 import com.project.popupmarket.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

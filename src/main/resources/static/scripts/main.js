@@ -219,10 +219,6 @@ function toggle() {
     eventBox.classList.toggle('bg-[#3FB8AF]');
 }
 
-function checkCreateCalendar() {
-    // 기존 코드...
-}
-
 // 인증 상태에 따른 UI 업데이트
 function updateAuthUI() {
     const isAuthenticated = TokenUtil.hasToken();
@@ -241,15 +237,66 @@ function updateAuthUI() {
     }
 }
 
-// 로그아웃 처리 함수
-function handleLogout() {
-    fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${TokenUtil.getToken()}`
-        }
-    }).finally(() => {
-        TokenUtil.removeToken();
-        window.location.href = '/';
+// price slider 생성
+function createPriceSlider() {
+    const priceSlider = document.getElementById('price-slider');
+    if (!priceSlider) return;
+
+    noUiSlider.create(priceSlider, {
+        start: [0, 1000000],
+        connect: true,
+        range: {
+            'min': 0,
+            'max': 1000000
+        },
+        step: 10000
+    });
+
+    const priceRange = document.getElementById('price-range');
+
+    priceSlider.noUiSlider.on('update', function(values) {
+        const min = Math.round(values[0]).toLocaleString();
+        const max = Math.round(values[1]).toLocaleString();
+        priceRange.textContent = `${min}원 - ${max}원`;
+    });
+}
+
+// place slider 생성
+function createPlaceSlider() {
+    const placeSlider = document.getElementById('place-slider');
+    if (!placeSlider) return;
+
+    noUiSlider.create(placeSlider, {
+        start: [0, 100],
+        connect: true,
+        range: {
+            'min': 0,
+            'max': 100
+        },
+        step: 1
+    });
+
+    const placeRange = document.getElementById('place-range');
+
+    placeSlider.noUiSlider.on('update', function(values) {
+        const min = Math.round(values[0]);
+        const max = Math.round(values[1]);
+        placeRange.textContent = `${min}평 - ${max}평`;
+    });
+}
+
+// calendar 생성
+function createPickCalendar() {
+    const quickCalendar = document.getElementById('quick-calendar');
+    if (!quickCalendar) return;
+
+    flatpickr(quickCalendar, {
+        mode: "range",
+        minDate: "today",
+        dateFormat: "Y.m.d",
+        locale: {
+            rangeSeparator: " - "
+        },
+        static: true
     });
 }

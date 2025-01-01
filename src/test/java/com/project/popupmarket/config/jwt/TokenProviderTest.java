@@ -46,7 +46,7 @@ class TokenProviderTest {
                 .brand("testBrand")
                 .tel("010-1234-1234")
                 .name("Test User")
-                .profile_image(defaultProfileImage)// name 필드 추가
+                .profileImage(defaultProfileImage)// name 필드 추가
                 .build());
 
         // when

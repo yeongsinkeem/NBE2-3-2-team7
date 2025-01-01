@@ -17,8 +17,10 @@
 	<script src="https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.js"></script>
 	<!-- Common JS -->
 	<script src="/scripts/common.js" defer></script>
+	<!-- Token JS -->
+	<script src="/scripts/token.js" defer></script>
 	<!-- Register JS -->
-	<script src="/scripts/register.js"></script>
+	<script src="/scripts/register.js" defer></script>
 	<style>
 		.noUi-horizontal .noUi-handle {
 			width: 24px;
@@ -37,7 +39,8 @@
 				<div class="min-w-96">
 					<p class="font-bold text-2xl">팝업마켓 회원가입</p>
 					<div class="mt-10">
-						<form class="space-y-4" action="/user" method="POST" th:action="@{/user}" th:object="${userRegisterDto}">
+						<!-- th:action과 method 속성 제거 -->
+						<form class="space-y-4" th:object="${userRegisterDto}">
 							<div>
 								<label for="email" class="block text-sm/6 font-medium text-gray-900">이메일</label>
 								<div class="mt-2">

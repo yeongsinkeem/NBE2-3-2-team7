@@ -1,4 +1,4 @@
-package com.project.popupmarket.service.userService;
+package com.project.popupmarket.service.tokenService;
 
 import com.project.popupmarket.entity.JwtToken;
 import com.project.popupmarket.repository.JwtTokenRepository;
