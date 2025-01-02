@@ -16,7 +16,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@ToString
 @Table(name = "rentalPlace")
 public class RentalPlace {
     @Id

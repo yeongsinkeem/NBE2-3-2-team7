@@ -22,7 +22,7 @@
 	<!-- Image Custom Upload JS -->
 	<script src="/scripts/image.custom.upload.js" defer></script>
 	<!-- My Place View JS -->
-	<script src="/scripts/my.place.view.js"></script>
+	<script src="/scripts/my.place.view.js" defer></script>
 	<style>
 		.noUi-horizontal .noUi-handle {
 			width: 24px;
@@ -45,22 +45,22 @@
 			</div>
 		</nav>
 		<section class="flex mt-4 w-full justify-center">
-			<form id="edit-popup-form" class="max-w-4xl px-4 flex flex-col w-full bg-white" enctype="multipart/form-data">
+			<form id="edit-place-form" class="max-w-4xl px-4 flex flex-col w-full bg-white" enctype="multipart/form-data">
 				<div class="flex justify-between pb-2 border-b border-gray-300">
 					<a href="/mypage/rental" class="font-bold p-2">&#10094;&#10094; 목록</a>
-					<button onclick="" class="p-2 text-red-500 rounded-lg font-bold text-sm hover:text-red-700 transition-colors">임대지 삭제</button>
+					<button onclick="deleteRentalPlace()" class="p-2 text-red-500 rounded-lg font-bold text-sm hover:text-red-700 transition-colors">임대지 삭제</button>
 				</div>
 				<div class="flex sm:space-x-2 space-x-0 sm:flex-row flex-col">
 					<div class="space-y-4 flex flex-col flex-shrink-0 justify-center items-center p-8">
-						<img id="thumbnail-image" src="#" class="w-40 h-40 border border-gray-300 object-contain bg-gray-300" alt="">
+						<img id="thumbnail-image" src="" class="w-40 h-40 border border-gray-300 object-cover bg-white" alt="">
 						<input type="file" id="thumbnail-real-upload" accept="image/gif, image/png, image/jpg" class="hidden">
 						<button id="thumbnail-custom-upload" onclick="uploadThumbnail()" class="p-2 bg-[#3FB8AF] text-white font-bold rounded-lg transition-colors hover:bg-[#2c817c]" type="button">이미지 변경하기</button>
 						<span class="text-xs font-bold block">2MB 이하로 업로드 해주세요.</span>
 					</div>
 					<div class="flex flex-col flex-grow p-8 space-y-4">
 						<div class="bg-white min-w-60 border px-4 border-gray-300 rounded-md p-2">
-							<label for="popup-title" class="font-bold">임대지 이름</label>
-							<input id="popup-title" type="text" class="w-full h-9 p-1 flex-grow focus:outline-[#3FB8AF]" placeholder="제목을 입력하시기 바랍니다." required>
+							<label for="place-title" class="font-bold">임대지 이름</label>
+							<input id="place-title" type="text" class="w-full h-9 p-1 flex-grow focus:outline-[#3FB8AF]" placeholder="제목을 입력하시기 바랍니다." required>
 						</div>
 						<div class="bg-white px-4 py-2 flex-1 border border-gray-300 rounded-md">
 							<label for="price" class="font-bold">금액 <span class="font-bold text-xs">(숫자만 입력해주시기 바랍니다.)</span></label>

@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Component
@@ -80,13 +83,23 @@ public class OAuth2SuccessHandler extends BaseAuthenticationSuccessHandler {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
 
-        String targetUrl = UriComponentsBuilder.fromUriString("/register")
-                .queryParam("email", email)
-                .queryParam("name", name)
-                .queryParam("oauth2", true)
-                .build().toUriString();
+        try {
+            String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
+            String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
 
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+
+            String targetUrl = UriComponentsBuilder.fromUriString("/register")
+                    .queryParam("email", encodedEmail)
+                    .queryParam("name", encodedName)
+                    .queryParam("oauth2", true)
+                    .build().toUriString();
+
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
+
+        } catch (UnsupportedEncodingException e) {
+            logger.error("URL 인코딩 오류", e);
+            response.sendRedirect("/login?error=encoding_error");
+        }
     }
 
     private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {

@@ -9,11 +9,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RentalPlaceImageListTO {
+public class RentalPlaceImageTO {
     private Long rentalPlaceSeq;
     private String image;
 
-    public RentalPlaceImageListTO(Long rentalPlaceSeq, String image) {
+    public RentalPlaceImageTO(Long rentalPlaceSeq, String image) {
         this.rentalPlaceSeq = rentalPlaceSeq;
         this.image = image;
     }

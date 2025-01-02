@@ -1,12 +1,16 @@
 package com.project.popupmarket.controller.invitation;
 
+import com.project.popupmarket.dto.invitation.InvitationInfoTO;
 import com.project.popupmarket.dto.invitation.InvitationTO;
 import com.project.popupmarket.service.invitation.InvitationService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api")
 public class InvitationController {
 
     private final InvitationService invitationService;
@@ -16,6 +20,7 @@ public class InvitationController {
     }
 
     @PostMapping("/invitation")
+    @Operation(summary = "입점 요청 추가")
     public ResponseEntity<String> addInvitation(@RequestBody InvitationTO invitation) {
 
         boolean flag = invitationService.addInvitation(invitation);
@@ -27,21 +32,15 @@ public class InvitationController {
         }
     }
 
-    // 임대지 기능과 병합 이후 진행
-//    @GetMapping("/invitation/{popupStoreSeq}")
-//    public ResponseEntity<List<InvitationInfoTO>> getInvitation(
-//            @PathVariable("popupStoreSeq") Long popupStoreSeq
-//    ) {
-//        List<InvitationInfoTO> lists = invitationService.getInvitations(popupStoreSeq);
-//
-//        if(lists.isEmpty()) {
-//            return ResponseEntity.status(404).build();
-//        } else {
-//            return ResponseEntity.ok(lists);
-//        }
-//    }
+    @GetMapping("/invitation/{popupStoreSeq}")
+    public InvitationInfoTO getInvitation(
+            @PathVariable("popupStoreSeq") Long popupStoreSeq
+    ) {
+        return invitationService.getInvitations(popupStoreSeq);
+    }
 
     @DeleteMapping("/invitation")
+    @Operation(summary = "입점 요청 삭제")
     public ResponseEntity<String> removeInvitation(@RequestBody InvitationTO invitation) {
 
         boolean flag = invitationService.removeInvitation(invitation);

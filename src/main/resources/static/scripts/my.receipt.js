@@ -1,23 +1,14 @@
 const receipts = document.getElementById('receipt-list');
-let result = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
 })
 
 function init() {
-    fetch('/api/receipt', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${1234}`,
-        }
-    })
+    fetch('/api/receipt')
         .then(resp => resp.json())
         .then(res => {
-            res.forEach((item) => {
-                renderReceipts(item)
-            })
-            receipts.innerHTML = result;
+            receipts.innerHTML = renderReceipts(res);
         })
         .catch(err => console.log(err));
 }
@@ -70,10 +61,14 @@ function refundAction(orderId) {
         .catch(err => console.log(err))
 }
 
-function renderReceipts(item) {
-    switch (item.reservationStatus) {
-        case '결제 완료':
-            result += `<div class="p-4 justify-between space-y-2 bg-white transition-colors hover:border-gray-700 flex flex-col border border-gray-300 rounded-lg">
+function renderReceipts(data) {
+    let result = '';
+
+    if (data.length >= 1) {
+        data.forEach((item) => {
+            switch (item.reservationStatus) {
+                case '결제 완료':
+                    result += `<div class="p-4 justify-between space-y-2 bg-white transition-colors hover:border-gray-700 flex flex-col border border-gray-300 rounded-lg">
                     <div class="flex justify-between">
                         <span class="font-bold text-sm text-gray-700">${item.reservationStatus}</span>
                         <button onclick="refundBtn('${item.orderId}','${item.rentalPlaceName}')" class="font-bold text-red-500 hover:text-red-700 text-xs">예약 취소</button>
@@ -87,9 +82,9 @@ function renderReceipts(item) {
                         <span class="font-bold text-lg">총 금액 ${item.totalAmount.toLocaleString()}원</span>
                     </div>
                 </div>`
-            break
-        case '임대 완료':
-            result += `<div class="p-4 justify-between space-y-2 transition-colors hover:bg-blue-300 bg-white flex flex-col border border-gray-300 rounded-lg">
+                    break
+                case '임대 완료':
+                    result += `<div class="p-4 justify-between space-y-2 transition-colors hover:bg-blue-300 bg-white flex flex-col border border-gray-300 rounded-lg">
                     <div class="flex justify-start">
                         <span class="font-bold text-sm text-[#3FB8AF]">${item.reservationStatus}</span>
                     </div>
@@ -102,9 +97,9 @@ function renderReceipts(item) {
                         <span class="font-bold text-lg">총 금액 ${item.totalAmount.toLocaleString()}원</span>
                     </div>
                 </div>`
-            break
-        case '환불 완료':
-            result += `<div class="p-4 justify-between space-y-2 transition-colors hover:border-red-500 bg-gray-200 flex flex-col border border-gray-300 rounded-lg">
+                    break
+                case '환불 완료':
+                    result += `<div class="p-4 justify-between space-y-2 transition-colors hover:border-red-500 bg-gray-200 flex flex-col border border-gray-300 rounded-lg">
                     <div class="flex justify-start">
                         <span class="font-bold text-sm text-red-500">${item.reservationStatus}</span>
                     </div>
@@ -117,6 +112,16 @@ function renderReceipts(item) {
                         <span class="font-bold text-lg">총 금액 ${item.totalAmount.toLocaleString()}원</span>
                     </div>
                 </div>`
-            break
+                    break
+            }
+        })
+    } else {
+        result = `<div class="flex justify-center items-center border-b border-gray-300 pb-4">
+            <div class="flex items-center gap-2 text-gray-700 font-bold">
+                결제 내역이 없습니다.
+            </div>
+        </div>`
     }
+
+    return result;
 }

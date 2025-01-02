@@ -1,10 +1,13 @@
 package com.project.popupmarket.service.rentalService;
 
-import com.project.popupmarket.dto.rentalDto.RentalPlaceImageListTO;
+import com.project.popupmarket.dto.rentalDto.RentalPlaceImageTO;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
+import com.project.popupmarket.dto.rentalDto.UserRentalPlaceInfoTO;
+import com.project.popupmarket.entity.PlaceRequestId;
 import com.project.popupmarket.entity.RentalPlace;
 import com.project.popupmarket.entity.RentalPlaceImageList;
 import com.project.popupmarket.entity.RentalPlaceImageListId;
+import com.project.popupmarket.repository.PlaceRequestRepository;
 import com.project.popupmarket.repository.RentalPlaceImageListJpaRepository;
 import com.project.popupmarket.repository.RentalPlaceJpaRepository;
 import jakarta.transaction.Transactional;
@@ -22,8 +25,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RentalPlaceServiceImpl {
@@ -31,123 +36,107 @@ public class RentalPlaceServiceImpl {
     private RentalPlaceJpaRepository rentalPlaceJpaRepository;
     @Autowired
     private RentalPlaceImageListJpaRepository rentalPlaceImageListJpaRepository;
+    @Autowired
+    private PlaceRequestRepository placeRequestRepository;
 
     public List<RentalPlaceTO> findWithLimit() {
-        List<Object[]> lists = rentalPlaceJpaRepository.findWithLimit();
+        ModelMapper modelMapper = new ModelMapper();
 
-        List<RentalPlaceTO> to = new ArrayList<>();
+        return rentalPlaceJpaRepository.findWithLimit()
+                .stream()
+                .map(p -> {
+                    RentalPlaceTO rentalPlace = modelMapper.map(p, RentalPlaceTO.class);
+                    rentalPlace.setThumbnail(
+                            p.getThumbnail() != null ? p.getThumbnail() : "thumbnail_default.png"
+                    );
 
-        for (Object[] result : lists) {
-            RentalPlaceTO rentalPlaceTO = new RentalPlaceTO();
-            rentalPlaceTO.setId((Long) result[0]); // seq
-            rentalPlaceTO.setName((String) result[1]);                 // name
-            rentalPlaceTO.setPrice((BigDecimal) result[2]);            // price
-            rentalPlaceTO.setAddress((String) result[3]);              // address
-            rentalPlaceTO.setThumbnail(result[4] != null
-                    ? "/images/place_thumbnail/" + result[4]
-                    : null);                                           // thumbnail
-            to.add(rentalPlaceTO);
-        }
-
-        return to;
+                    return rentalPlace;
+                }).toList();
     }
 
     public RentalPlaceTO findById(Long id) {
 
-        RentalPlace rentalPlace = rentalPlaceJpaRepository.findById(id).get();
+        Optional<RentalPlace> rentalPlace = rentalPlaceJpaRepository.findById(id);
 
-        ModelMapper mapper = new ModelMapper();
-        RentalPlaceTO to = mapper.map(rentalPlace, RentalPlaceTO.class);
+        if (rentalPlace.isPresent()) {
+            RentalPlaceTO rentalPlaceTO = new ModelMapper().map(rentalPlace.get(), RentalPlaceTO.class);
+            rentalPlaceTO.setThumbnail(
+                    (rentalPlace.get().getThumbnail() != null ?
+                            rentalPlace.get().getThumbnail() : "thumbnail_default.png")
+            );
 
-        to.setThumbnail((rentalPlace.getThumbnail() != null
-                ? "/images/place_thumbnail/" + rentalPlace.getThumbnail() : null));
+            return rentalPlaceTO;
+        }
 
-        return to;
+        return null;
     }
 
-    public RentalPlaceTO findDetailById(Long id) {
-        Object result = rentalPlaceJpaRepository.findDetailById(id);
-
-        Object[] objects = (Object[]) result;
-
-        RentalPlaceTO rentalPlaceTO = new RentalPlaceTO();
-        rentalPlaceTO.setZipcode((String) objects[0]);
-        rentalPlaceTO.setPrice((BigDecimal) objects[1]);
-        rentalPlaceTO.setAddress((String) objects[2]);
-        rentalPlaceTO.setAddrDetail((String) objects[3]);
-        rentalPlaceTO.setDescription((String) objects[4]);
-        rentalPlaceTO.setInfra((String) objects[5]);
-        rentalPlaceTO.setName((String) objects[6]);
-        rentalPlaceTO.setCapacity((String) objects[7]);
-        rentalPlaceTO.setNearbyAgeGroup((String) objects[8]);
-        rentalPlaceTO.setRegisteredAt((Instant) objects[9]);
-
-        return rentalPlaceTO;
+    public String findPlaceThumbnailById(Long placeSeq) {
+        return rentalPlaceJpaRepository.findById(placeSeq).get().getThumbnail();
     }
 
     public Page<RentalPlaceTO> findFilteredWithPagination(
             Integer minCapacity, Integer maxCapacity, String location,
-            BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+            BigDecimal minPrice, BigDecimal maxPrice,
+            LocalDate startDate, LocalDate endDate,
+            String sorting, Pageable pageable) {
+        ModelMapper modelMapper = new ModelMapper();
 
-        Page<Object[]> lists = rentalPlaceJpaRepository.findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, pageable);
-        System.out.println(lists);
-        System.out.println("Content: " + lists.getContent());
+        return rentalPlaceJpaRepository
+                .findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, startDate, endDate, sorting, pageable)
+                .map(rp -> {
+                    RentalPlaceTO rentalPlaceTO = modelMapper.map(rp, RentalPlaceTO.class);
+                    rentalPlaceTO.setThumbnail(rp.getThumbnail() != null ?
+                            rp.getThumbnail() : "thumbnail_default.png");
 
-//        rp.Capacity, rp.price, rp.name, rp.thumbnail, rp.registeredAt
-        Page<RentalPlaceTO> to = lists.map(objects -> {
-            RentalPlaceTO rentalPlaceTO = new RentalPlaceTO();
-            rentalPlaceTO.setCapacity((String) objects[0]);
-            rentalPlaceTO.setPrice((BigDecimal) objects[1]);
-            rentalPlaceTO.setName((String) objects[2]);
-            rentalPlaceTO.setThumbnail(objects[3] != null
-                    ? "/images/place_thumbnail/" + objects[3]
-                    : null);
-            rentalPlaceTO.setRegisteredAt((Instant) objects[4]);
-            return rentalPlaceTO;
-        });
-
-        return to;
+                    return rentalPlaceTO;
+                });
     }
 
-    public List<RentalPlaceImageListTO> findRentalPlaceImageList (Long id) {
+    public List<RentalPlaceImageTO> findRentalPlaceImageList (Long id) {
 
         List<RentalPlaceImageList> lists = rentalPlaceImageListJpaRepository.findRentalPlaceImageList(id);
 
-        List<RentalPlaceImageListTO> toList = new ArrayList<>();
+        List<RentalPlaceImageTO> toList = new ArrayList<>();
         for (RentalPlaceImageList result : lists) {
-            RentalPlaceImageListTO to = new RentalPlaceImageListTO();
+            RentalPlaceImageTO to = new RentalPlaceImageTO();
             to.setRentalPlaceSeq(result.getId().getRentalPlaceSeq());
-            to.setImage("/images/place_details/" + result.getId().getImage());
+            to.setImage(result.getId().getImage());
             toList.add(to);
         }
 
         return toList;
     }
 
-    public List<RentalPlaceTO> findRentalPlacesByUserId (Long id) {
-        List<Object[]> results = rentalPlaceJpaRepository.findRentalPlacesByUserId(id);
+    public List<RentalPlaceTO> findRentalPlacesByUserId (Long userSeq) {
+        ModelMapper modelMapper = new ModelMapper();
 
-        List<RentalPlaceTO> toList = new ArrayList<>();
-        for (Object[] result : results) {
-            RentalPlaceTO to = new RentalPlaceTO();
-            to.setId((Long) result[0]);
-            to.setThumbnail(result[1] != null
-                    ? "/images/place_thumbnail/" + (String) result[1]
-                    : null);
-            to.setAddress((String) result[2]);
-            to.setName((String) result[3]);
-            to.setStatus((String) result[4]);
-            toList.add(to);
-        }
+        return rentalPlaceJpaRepository.findRentalPlacesByUserId(userSeq)
+                .stream().map(rp -> {
+                    RentalPlaceTO to = modelMapper.map(rp, RentalPlaceTO.class);
+                    to.setThumbnail(rp.getThumbnail() != null ?
+                            rp.getThumbnail() : "thumbnail_default.png");
 
-        return toList;
+                    return to;
+                })
+                .toList();
     }
+
+    public List<UserRentalPlaceInfoTO> findUserRentalPlaceInfo (Long userSeq, Long popupSeq) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        return rentalPlaceJpaRepository.findActivatedRentalPlacesByUserId(userSeq, popupSeq)
+                .stream().map(rp -> modelMapper.map(rp, UserRentalPlaceInfoTO.class))
+                .toList();
+    }
+
     public int insertRentalPlace(RentalPlaceTO to, MultipartFile thumbnail){
         int flag=0;
         to.setRegisteredAt(Instant.now());
 
         ModelMapper mapper = new ModelMapper();
         RentalPlace rentalPlace = mapper.map(to, RentalPlace.class);
+        rentalPlace.setStatus("ACTIVE");
 
         RentalPlace savedPlace = rentalPlaceJpaRepository.save(rentalPlace);
         Long id = savedPlace.getId();
@@ -155,8 +144,7 @@ public class RentalPlaceServiceImpl {
 
         String thumbnailName;
         if (thumbnail == null || thumbnail.isEmpty()) {
-            thumbnailName = "thumbnail_default.png";
-            savedPlace.setThumbnail(thumbnailName);
+            savedPlace.setThumbnail(null);
         } else {
             String extension = "";
             String originalFilename = thumbnail.getOriginalFilename();
@@ -170,6 +158,7 @@ public class RentalPlaceServiceImpl {
 
         return flag;
     }
+
     @Transactional
     public int updateRentalPlaceStatus(Long id, String status) {
         int flag = 0;
@@ -189,6 +178,8 @@ public class RentalPlaceServiceImpl {
         // RentalPlace 저장
         ModelMapper mapper = new ModelMapper();
         RentalPlace rentalPlace = mapper.map(to, RentalPlace.class);
+        rentalPlace.setStatus("ACTIVE");
+
         RentalPlace savedPlace = rentalPlaceJpaRepository.save(rentalPlace);
         Long id = savedPlace.getId();
         Long userSeq = savedPlace.getRentalUserSeq().getId();
@@ -212,20 +203,7 @@ public class RentalPlaceServiceImpl {
 
         // 상세 이미지 저장
         List<RentalPlaceImageList> lists = new ArrayList<>();
-        if (images == null || images.isEmpty()) {
-            // 이미지가 비어있을 때 기본 이미지 추가
-            String defaultImageName = "thumbnail_default.png";
-
-            RentalPlaceImageListId imageListId = new RentalPlaceImageListId();
-            imageListId.setRentalPlaceSeq(id);
-            imageListId.setImage(defaultImageName);
-
-            RentalPlaceImageList imageList = new RentalPlaceImageList();
-            imageList.setId(imageListId);
-            imageList.setRentalPlaceSeq(savedPlace);
-
-            lists.add(imageList);
-        } else {
+        if (!images.isEmpty()) {
             for (int i = 0; i < images.size(); i++) {
                 MultipartFile imageFile = images.get(i);
 
@@ -246,9 +224,22 @@ public class RentalPlaceServiceImpl {
 
                 lists.add(imageList);
             }
-        }
 
-        rentalPlaceImageListJpaRepository.saveAll(lists);
+            rentalPlaceImageListJpaRepository.saveAll(lists);
+        } else {
+//            // 이미지가 비어있을 때 기본 이미지 추가 / 추가 x 상세 이미지는 무조건 들어와야 됨
+//            String defaultImageName = "thumbnail_default.png";
+//
+//            RentalPlaceImageListId imageListId = new RentalPlaceImageListId();
+//            imageListId.setRentalPlaceSeq(id);
+//            imageListId.setImage(defaultImageName);
+//
+//            RentalPlaceImageList imageList = new RentalPlaceImageList();
+//            imageList.setId(imageListId);
+//            imageList.setRentalPlaceSeq(savedPlace);
+//
+//            lists.add(imageList);
+        }
 
         return flag;
     }
@@ -261,7 +252,7 @@ public class RentalPlaceServiceImpl {
         // 이미지 데이터 저장
         List<RentalPlaceImageList> lists = new ArrayList<>();
         if (images == null || images.isEmpty()) {
-            // 이미지가 없을 때 기본 이미지 추가
+            // 이미지가 없을 때 기본 이미지 추가 -> null로 적용.
             String defaultImageName = "thumbnail_default.png";
 
             RentalPlaceImageListId imageListId = new RentalPlaceImageListId();
@@ -305,6 +296,7 @@ public class RentalPlaceServiceImpl {
         deleteThumbnailFile(id, userSeq);
         deleteImageFiles(id, userSeq);
 
+        placeRequestRepository.deletePlaceRequestsByRentalPlaceSeq(id);
         rentalPlaceImageListJpaRepository.deleteRentalPlaceImageBySeq(id);
         rentalPlaceJpaRepository.deleteRentalPlaceById(id);
 
@@ -320,7 +312,7 @@ public class RentalPlaceServiceImpl {
     }
 
     private void saveFile(MultipartFile file, String folder, String filename) {
-        String path = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+        String path = "C:/popupmarket/";
         try {
             String uploadDir = path + folder + "/";
             Path filePath = Paths.get(uploadDir + filename);
@@ -333,7 +325,7 @@ public class RentalPlaceServiceImpl {
 
     private void deleteThumbnailFile(Long id, Long userSeq) {
         try {
-            String basePath = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+            String basePath = "C:/popupmarket/";
             String thumbnailPath = String.format(basePath + "place_thumbnail/place_%d_%d_thumbnail.png", id, userSeq);
             File thumbnailFile = new File(thumbnailPath);
 
@@ -352,7 +344,7 @@ public class RentalPlaceServiceImpl {
     }
     private void deleteImageFiles(Long id, Long userSeq) {
         try {
-            String basePath = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+            String basePath = "C:/popupmarket/";
             String imagePathPattern = String.format(basePath + "place_detail/place_%d_%d_images_", id, userSeq);
 
             int index = 1;
