@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import static com.project.popupmarket.config.handler.BaseAuthenticationSuccessHandler.*;
+
 import java.io.IOException;
 
 
@@ -61,6 +63,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
+        return null;
+    }
+
+    private String getTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (JWT_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
         return null;
     }
 }

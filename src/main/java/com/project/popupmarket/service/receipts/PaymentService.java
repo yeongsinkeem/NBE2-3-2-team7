@@ -76,7 +76,7 @@ public class PaymentService {
             reservationInfoTO.setUserEmail(user.getEmail());
             reservationInfoTO.setUserName(user.getName());
             reservationInfoTO.setUserTel(user.getTel());
-            reservationInfoTO.setArea(rentalPlace.getArea());
+            reservationInfoTO.setArea(rentalPlace.getZipcode());
             reservationInfoTO.setAddress(rentalPlace.getAddress());
             reservationInfoTO.setAddrDetail(rentalPlace.getAddrDetail());
 
