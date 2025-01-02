@@ -104,7 +104,7 @@ function renderPlaceInfo(data) {
 				</div>`;
 	}
 
-	let infraList = info.infra.split(', ');
+	let infraList = info.infra.split(',');
 
 	let infraInsert = '';
 	infraList.forEach(item => {

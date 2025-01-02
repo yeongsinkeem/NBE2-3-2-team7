@@ -15,10 +15,10 @@ import java.util.List;
 public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Long> {
     //jpql
 
-    @Query(value = "SELECT r FROM RentalPlace r ORDER BY r.registeredAt DESC LIMIT 10")
+    @Query(value = "SELECT rp FROM RentalPlace rp ORDER BY rp.registeredAt DESC LIMIT 10")
     List<RentalPlace> findWithLimit();
 
-    @Query("SELECT rp.id, rp.thumbnail, rp.address, rp.name, rp.status " +
+    @Query("SELECT rp " +
             "FROM RentalPlace rp WHERE rp.rentalUserSeq.id = :userId")
     List<RentalPlace> findRentalPlacesByUserId(@Param("userId") Long userId);
 

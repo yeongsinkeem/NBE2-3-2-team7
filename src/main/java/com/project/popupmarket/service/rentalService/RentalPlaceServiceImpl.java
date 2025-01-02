@@ -100,10 +100,10 @@ public class RentalPlaceServiceImpl {
         return toList;
     }
 
-    public List<RentalPlaceTO> findRentalPlacesByUserId (Long id) {
+    public List<RentalPlaceTO> findRentalPlacesByUserId (Long userSeq) {
         ModelMapper modelMapper = new ModelMapper();
 
-        return rentalPlaceJpaRepository.findRentalPlacesByUserId(id)
+        return rentalPlaceJpaRepository.findRentalPlacesByUserId(userSeq)
                 .stream().map(rp -> {
                     RentalPlaceTO to = modelMapper.map(rp, RentalPlaceTO.class);
                     to.setThumbnail(rp.getThumbnail() != null ?
@@ -128,6 +128,7 @@ public class RentalPlaceServiceImpl {
 
         ModelMapper mapper = new ModelMapper();
         RentalPlace rentalPlace = mapper.map(to, RentalPlace.class);
+        rentalPlace.setStatus("ACTIVE");
 
         RentalPlace savedPlace = rentalPlaceJpaRepository.save(rentalPlace);
         Long id = savedPlace.getId();
@@ -170,6 +171,8 @@ public class RentalPlaceServiceImpl {
         // RentalPlace 저장
         ModelMapper mapper = new ModelMapper();
         RentalPlace rentalPlace = mapper.map(to, RentalPlace.class);
+        rentalPlace.setStatus("ACTIVE");
+
         RentalPlace savedPlace = rentalPlaceJpaRepository.save(rentalPlace);
         Long id = savedPlace.getId();
         Long userSeq = savedPlace.getRentalUserSeq().getId();
@@ -193,20 +196,7 @@ public class RentalPlaceServiceImpl {
 
         // 상세 이미지 저장
         List<RentalPlaceImageList> lists = new ArrayList<>();
-        if (images == null || images.isEmpty()) {
-            // 이미지가 비어있을 때 기본 이미지 추가
-            String defaultImageName = "thumbnail_default.png";
-
-            RentalPlaceImageListId imageListId = new RentalPlaceImageListId();
-            imageListId.setRentalPlaceSeq(id);
-            imageListId.setImage(defaultImageName);
-
-            RentalPlaceImageList imageList = new RentalPlaceImageList();
-            imageList.setId(imageListId);
-            imageList.setRentalPlaceSeq(savedPlace);
-
-            lists.add(imageList);
-        } else {
+        if (!images.isEmpty()) {
             for (int i = 0; i < images.size(); i++) {
                 MultipartFile imageFile = images.get(i);
 
@@ -227,9 +217,22 @@ public class RentalPlaceServiceImpl {
 
                 lists.add(imageList);
             }
-        }
 
-        rentalPlaceImageListJpaRepository.saveAll(lists);
+            rentalPlaceImageListJpaRepository.saveAll(lists);
+        } else {
+//            // 이미지가 비어있을 때 기본 이미지 추가 / 추가 x 상세 이미지는 무조건 들어와야 됨
+//            String defaultImageName = "thumbnail_default.png";
+//
+//            RentalPlaceImageListId imageListId = new RentalPlaceImageListId();
+//            imageListId.setRentalPlaceSeq(id);
+//            imageListId.setImage(defaultImageName);
+//
+//            RentalPlaceImageList imageList = new RentalPlaceImageList();
+//            imageList.setId(imageListId);
+//            imageList.setRentalPlaceSeq(savedPlace);
+//
+//            lists.add(imageList);
+        }
 
         return flag;
     }
@@ -301,7 +304,7 @@ public class RentalPlaceServiceImpl {
     }
 
     private void saveFile(MultipartFile file, String folder, String filename) {
-        String path = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+        String path = "C:/popupmarket/";
         try {
             String uploadDir = path + folder + "/";
             Path filePath = Paths.get(uploadDir + filename);
@@ -314,7 +317,7 @@ public class RentalPlaceServiceImpl {
 
     private void deleteThumbnailFile(Long id, Long userSeq) {
         try {
-            String basePath = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+            String basePath = "C:/popupmarket/";
             String thumbnailPath = String.format(basePath + "place_thumbnail/place_%d_%d_thumbnail.png", id, userSeq);
             File thumbnailFile = new File(thumbnailPath);
 
@@ -333,7 +336,7 @@ public class RentalPlaceServiceImpl {
     }
     private void deleteImageFiles(Long id, Long userSeq) {
         try {
-            String basePath = "C:/Users/Kang/Java/SpringProjects/NBE2-3-2-team7/src/main/resources/static/images/";
+            String basePath = "C:/popupmarket/";
             String imagePathPattern = String.format(basePath + "place_detail/place_%d_%d_images_", id, userSeq);
 
             int index = 1;
