@@ -1,7 +1,8 @@
-package com.project.popupmarket.service.userService;
+package com.project.popupmarket.service.tokenService;
 
 import com.project.popupmarket.config.jwt.TokenProvider;
 import com.project.popupmarket.entity.User;
+import com.project.popupmarket.service.userService.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
