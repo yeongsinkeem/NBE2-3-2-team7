@@ -116,14 +116,12 @@ function renderReceipts(data) {
             }
         })
     } else {
-        result = `<div class="flex justify-center items-center">
+        result = `<div class="flex justify-center items-center border-b border-gray-300 pb-4">
             <div class="flex items-center gap-2 text-gray-700 font-bold">
                 결제 내역이 없습니다.
             </div>
         </div>`
     }
-
-
 
     return result;
 }

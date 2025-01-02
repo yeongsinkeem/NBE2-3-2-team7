@@ -33,9 +33,9 @@ public class ReceiptsScheduler {
         LocalDate today = LocalDate.now();
 
         List<Receipt> receipts = query.select(qReceipt).from(qReceipt)
-                .where(qReceipt.startDate.eq(today).and(
-                        qReceipt.reservationStatus.loe(Receipt.ReservationStatus.COMPLETED)
-                )).fetch();
+                .where(qReceipt.startDate.goe(today)
+                        .and(qReceipt.reservationStatus.eq(Receipt.ReservationStatus.COMPLETED)))
+                .fetch();
 
         receipts.forEach(receipt -> {
             receipt.setReservationStatus(Receipt.ReservationStatus.LEASED);

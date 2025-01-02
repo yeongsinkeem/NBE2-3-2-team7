@@ -33,8 +33,9 @@ function init() {
 		.then(resp => resp.json())
 		.then(res => {
 			let popup = '';
-			res.content.forEach(item => {
-				popup += `<a class="group drop-shadow-lg relative p-4 border m-2 rounded-lg border-gray-300" href="/popup/detail/${item.id}">
+			if (res.content.length > 0) {
+				res.content.forEach(item => {
+					popup += `<a class="group drop-shadow-lg relative p-4 border m-2 rounded-lg border-gray-300" href="/popup/detail/${item.id}">
 					<div class="absolute w-full h-full bg-gray-300 opacity-0 group-hover:opacity-50 transition left-0 top-0"></div>
 					<div class="mt-2 block relative overflow-hidden rounded-lg border border-gray-400">
 						<img class="w-full size-40 object-cover bg-gray-100" src="/images/popup_thumbnail/${item.thumbnail}" alt="Project">
@@ -54,7 +55,15 @@ function init() {
 						</div>
 					</div>
 				</a>`
-			})
+				})
+			} else {
+				popup = `<div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center items-center">
+                    <div class="flex items-center gap-2 text-gray-700 font-bold">
+                        조회된 팝업이 없습니다.
+                    </div>
+                </div>`;
+			}
+				
 
 			box.innerHTML = popup;
 			paging.innerHTML = renderPagination(res.page.number, res.page.totalPages);

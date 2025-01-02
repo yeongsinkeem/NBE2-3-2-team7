@@ -152,6 +152,8 @@ public class PopupStoreController {
         try {
             Long userSeq = userContextUtil.getUserId();
 
+            System.out.println(thimg.getOriginalFilename());
+
             // 1. 팝업스토어 업데이트
             int thCount = popupStoreServiceImpl.updatePopup(seq, userSeq, popupStore, thimg); // updatePopup 메서드는 int 반환
             // 2. 팝업스토어 이미지 업데이트

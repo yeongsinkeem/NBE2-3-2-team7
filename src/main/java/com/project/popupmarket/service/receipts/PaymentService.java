@@ -4,6 +4,7 @@ import com.project.popupmarket.dto.payment.*;
 import com.project.popupmarket.entity.*;
 import com.project.popupmarket.repository.ReceiptRepository;
 import com.project.popupmarket.repository.StagingPaymentRepository;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import jakarta.persistence.EntityManager;
@@ -245,20 +246,11 @@ public class PaymentService {
         QReceipt qReceipt = QReceipt.receipt;
         JPAQuery<Receipt> query = new JPAQuery<>(em);
 
-        List<RangeDateTO> rangeDates = new ArrayList<>();
-
-        query.select(qReceipt).from(qReceipt)
-                .where(qReceipt.rentalPlaceSeq.eq(rentalPlaceSeq).and(
-                        qReceipt.reservationStatus.eq(ReservationStatus.COMPLETED)
-                ).and(
-                        qReceipt.startDate.gt(LocalDate.now())
-                )).fetch().forEach(item -> {
-                    RangeDateTO rangeDateTO = new RangeDateTO();
-                    rangeDateTO.setStartDate(item.getStartDate());
-                    rangeDateTO.setEndDate(item.getEndDate());
-                    rangeDates.add(rangeDateTO);
-                });
-
-        return rangeDates;
+        return query.select(Projections.constructor(RangeDateTO.class, qReceipt.startDate, qReceipt.endDate)).from(qReceipt)
+                .where(
+                    qReceipt.rentalPlaceSeq.eq(rentalPlaceSeq)
+                    .and(qReceipt.reservationStatus.eq(ReservationStatus.COMPLETED))
+                    .and(qReceipt.startDate.goe(LocalDate.now()))
+                ).fetch();
     }
 }

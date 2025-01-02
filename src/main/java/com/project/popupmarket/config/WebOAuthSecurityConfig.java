@@ -1,6 +1,5 @@
 package com.project.popupmarket.config;
 
-import com.project.popupmarket.config.handler.BaseAuthenticationSuccessHandler;
 import com.project.popupmarket.config.handler.FormLoginSuccessHandler;
 import com.project.popupmarket.config.handler.OAuth2SuccessHandler;
 import com.project.popupmarket.config.jwt.TokenAuthenticationFilter;
@@ -62,7 +61,7 @@ public class WebOAuthSecurityConfig {
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
                         .requestMatchers("/api/signup", "/api/login").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/**").permitAll()
 
                         // 누구나 접근 가능한 페이지
                         .requestMatchers(antMatcher("/")).permitAll()

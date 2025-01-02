@@ -19,13 +19,15 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
     List<RentalPlace> findWithLimit();
 
     @Query("SELECT rp " +
-            "FROM RentalPlace rp WHERE rp.rentalUserSeq.id = :userId")
+            "FROM RentalPlace rp " +
+            "WHERE rp.rentalUserSeq.id = :userId " +
+            "ORDER BY rp.registeredAt DESC")
     List<RentalPlace> findRentalPlacesByUserId(@Param("userId") Long userId);
 
     @Query("SELECT rp " +
             "FROM RentalPlace rp " +
             "WHERE rp.rentalUserSeq.id = :userId " +
-            "AND rp.status = 'ACTIVE'" +
+            "AND rp.status = 'active' " +
             "AND NOT EXISTS ( " +
             "    SELECT 1 " +
             "    FROM PlaceRequest pr " +

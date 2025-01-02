@@ -51,7 +51,7 @@ public class CompositeController {
     @GetMapping("/popup/bundle/{popupSeq}")
     @Operation(summary = "개별 팝업 조회 (feat. 권유 목록)" )
     public ResponseEntity<PopupDetailRespTO> getPopupBySeqWithPlaceInfo(@PathVariable Long popupSeq) {
-        Long userId = userContextUtil.getUserId();
+        Long userSeq = userContextUtil.getUserId();
 
         PopupStoreTO to = popupStoreService.findBySeq(popupSeq);
         List<String> imgLst = popupStoreImageJpaRepository.findById_PopupStoreSeq(popupSeq);
@@ -59,7 +59,7 @@ public class CompositeController {
         if (to == null) {
             return ResponseEntity.status(404).build();
         }
-        return ResponseEntity.ok(new PopupDetailRespTO(rentalPlaceService.findUserRentalPlaceInfo(popupSeq, userId), new PopupStoreImgDTO(to, imgLst)));
+        return ResponseEntity.ok(new PopupDetailRespTO(rentalPlaceService.findUserRentalPlaceInfo(userSeq, popupSeq), new PopupStoreImgDTO(to, imgLst)));
     }
 
     @GetMapping("/rental/bundle/{placeSeq}")
@@ -68,7 +68,7 @@ public class CompositeController {
         RentalPlaceTO to = rentalPlaceService.findById(placeSeq);
         List<RentalPlaceImageTO> imageTo = rentalPlaceService.findRentalPlaceImageList(placeSeq);
 
-        if (to == null) { // 결과가 비어 있는 경우 204 No Content
+        if (to == null) {
             return ResponseEntity.status(404).build();
         }
 

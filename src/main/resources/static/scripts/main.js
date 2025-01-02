@@ -264,7 +264,7 @@ function init() {
             res.rentalPlace.forEach(item => {
                 place += `<div class="snap-center shrink-0 first:pl-8 last:pr-8">
                     <a href="/rental/detail/${item.id}" class="rounded-md flex flex-col p-4 shadow-xl bg-white border hover:transform hover:translate-y-[-10px] transition-transform duration-200">
-                        <img class="shrink-0 w-80 h-40 rounded-lg shadow-xl bg-white" src="/images/place_thumbnail/${item.thumbnail}" alt="">
+                        <img class="shrink-0 w-80 h-40 rounded-lg object-cover shadow-xl bg-white" src="/images/place_thumbnail/${item.thumbnail}" alt="">
                             <span class="my-4 font-bold">${truncateString(item.name)}</span>
                             <div class="flex justify-between">
                                 <p>${item.price.toLocaleString()}원</p>
@@ -279,7 +279,7 @@ function init() {
             res.popupStore.forEach(item => {
                 popup += `<div class="snap-center shrink-0 first:pl-8 last:pr-8">
                     <a href="/popup/detail/${item.id}" class="rounded-md flex flex-col p-4 shadow-xl bg-white border hover:transform hover:translate-y-[-10px] transition-transform duration-200">
-                        <img class="shrink-0 w-80 h-40 rounded-lg shadow-xl bg-white" src="/images/popup_thumbnail/${item.thumbnail}" alt="">
+                        <img class="shrink-0 w-80 h-40 rounded-lg object-cover shadow-xl bg-white" src="/images/popup_thumbnail/${item.thumbnail}" alt="">
                             <span class="my-4 font-bold">${truncateString(item.title)}</span>
                             <div class="flex justify-between">
                                 <p>${item.type}</p>

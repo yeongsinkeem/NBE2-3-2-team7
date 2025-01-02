@@ -31,9 +31,6 @@ public class UserService {
     @Value("${app.upload-path}")
     private String uploadPath;
 
-    @Value("${app.default-profile-image}")
-    private String defaultProfileImage = "default_profile.png";
-
     private final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif");
     private final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
@@ -46,7 +43,7 @@ public class UserService {
                 .brand(dto.getBrand())
                 .name(dto.getName())
                 .tel(dto.getTel())
-                .profileImage(defaultProfileImage)
+                .profileImage(null)
                 .build()).getId();
     }
 
@@ -84,7 +81,7 @@ public class UserService {
             user.setProfileImage(newFileName);
 
             // 기존 이미지 삭제 (기본 이미지가 아닌 경우에만)
-            if (oldImage != null && !oldImage.equals(defaultProfileImage)) {
+            if (oldImage != null) {
                 deleteProfileImage(oldImage);
             }
         }
@@ -145,7 +142,7 @@ public class UserService {
 
         // 프로필 이미지 삭제 (기본 이미지가 아닌 경우에만)
         String profileImage = user.getProfileImage();
-        if (profileImage != null && !profileImage.equals(defaultProfileImage)) {
+        if (profileImage != null) {
             deleteProfileImage(profileImage);
         }
 

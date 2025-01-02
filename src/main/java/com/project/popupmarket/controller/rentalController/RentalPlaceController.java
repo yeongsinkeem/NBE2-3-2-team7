@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class RentalPlaceController {
 
     @GetMapping("/rental/list")
     @Operation(summary = "조건에 해당하는 임대지 리스트")
-    public ResponseEntity<Page<RentalPlaceTO>> rentalListPagination( // 임대 리스트 페이지 9개 + 필터링 + 페이지네이션
+    public Page<RentalPlaceTO> rentalListPagination( // 임대 리스트 페이지 9개 + 필터링 + 페이지네이션
             @RequestParam(required = false) Integer minCapacity, // 최소 면적 기본값 0
             @RequestParam(required = false) Integer maxCapacity, // 최소 면적 기본값 100
             @RequestParam(required = false) String location,     // 위치, 기본값 null
@@ -57,14 +58,8 @@ public class RentalPlaceController {
         maxPrice = (maxPrice != null) ? maxPrice : new BigDecimal(10000000);
 
         Pageable pageable = PageRequest.of(page, 9);
-        Page<RentalPlaceTO> results = rentalPlaceService.findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, startDate, endDate, sorting, pageable);
 
-
-        if (results.isEmpty()) { // 결과가 비어 있는 경우 204 No Content
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(results);
+        return rentalPlaceService.findFilteredWithPagination(minCapacity, maxCapacity, location, minPrice, maxPrice, startDate, endDate, sorting, pageable);
     }
 
     @GetMapping("/rental/user")
@@ -110,8 +105,8 @@ public class RentalPlaceController {
         RentalPlaceTO to = rentalPlaceService.findById(id);
         List<RentalPlaceImageTO> imageTo = rentalPlaceService.findRentalPlaceImageList(id);
 
-        if (to == null) { // 결과가 비어 있는 경우 204 No Content
-            return ResponseEntity.noContent().build();
+        if (to == null) {
+            return ResponseEntity.status(404).build();
         }
 
         return ResponseEntity.ok(new RentalPlaceRespTO(to, imageTo));
@@ -122,11 +117,12 @@ public class RentalPlaceController {
     public ResponseEntity<Void> updateRentalPlace(
             @PathVariable("id") Long id,
             @RequestPart("rentalPlace") RentalPlaceTO rentalPlaceTO,
-            @RequestPart("thumbnail") MultipartFile thumbnail,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
             @RequestPart("images") List<MultipartFile> images
     ) {
 
         rentalPlaceTO.setId(id);
+        rentalPlaceTO.setRentalUserSeqId(userContextUtil.getUserId());
 
         rentalPlaceService.insertRentalPlace(rentalPlaceTO, thumbnail);
         rentalPlaceService.deleteRentalPlaceImageById(id);

@@ -3,9 +3,11 @@ package com.project.popupmarket.service.rentalService;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceImageTO;
 import com.project.popupmarket.dto.rentalDto.RentalPlaceTO;
 import com.project.popupmarket.dto.rentalDto.UserRentalPlaceInfoTO;
+import com.project.popupmarket.entity.PlaceRequestId;
 import com.project.popupmarket.entity.RentalPlace;
 import com.project.popupmarket.entity.RentalPlaceImageList;
 import com.project.popupmarket.entity.RentalPlaceImageListId;
+import com.project.popupmarket.repository.PlaceRequestRepository;
 import com.project.popupmarket.repository.RentalPlaceImageListJpaRepository;
 import com.project.popupmarket.repository.RentalPlaceJpaRepository;
 import jakarta.transaction.Transactional;
@@ -34,6 +36,8 @@ public class RentalPlaceServiceImpl {
     private RentalPlaceJpaRepository rentalPlaceJpaRepository;
     @Autowired
     private RentalPlaceImageListJpaRepository rentalPlaceImageListJpaRepository;
+    @Autowired
+    private PlaceRequestRepository placeRequestRepository;
 
     public List<RentalPlaceTO> findWithLimit() {
         ModelMapper modelMapper = new ModelMapper();
@@ -65,6 +69,10 @@ public class RentalPlaceServiceImpl {
         }
 
         return null;
+    }
+
+    public String findPlaceThumbnailById(Long placeSeq) {
+        return rentalPlaceJpaRepository.findById(placeSeq).get().getThumbnail();
     }
 
     public Page<RentalPlaceTO> findFilteredWithPagination(
@@ -136,8 +144,7 @@ public class RentalPlaceServiceImpl {
 
         String thumbnailName;
         if (thumbnail == null || thumbnail.isEmpty()) {
-            thumbnailName = "thumbnail_default.png";
-            savedPlace.setThumbnail(thumbnailName);
+            savedPlace.setThumbnail(null);
         } else {
             String extension = "";
             String originalFilename = thumbnail.getOriginalFilename();
@@ -289,6 +296,7 @@ public class RentalPlaceServiceImpl {
         deleteThumbnailFile(id, userSeq);
         deleteImageFiles(id, userSeq);
 
+        placeRequestRepository.deletePlaceRequestsByRentalPlaceSeq(id);
         rentalPlaceImageListJpaRepository.deleteRentalPlaceImageBySeq(id);
         rentalPlaceJpaRepository.deleteRentalPlaceById(id);
 

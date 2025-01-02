@@ -11,6 +11,8 @@ import com.project.popupmarket.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ import java.util.List;
 
 @Service
 public class PopupStoreServiceImpl {
+    private static final Logger log = LoggerFactory.getLogger(PopupStoreServiceImpl.class);
     @Autowired
     private PopupStoreJpaRepository popupStoreJpaRepository;
     @Autowired
@@ -75,8 +78,11 @@ public class PopupStoreServiceImpl {
             return null;
         }
 
+        PopupStoreTO to = new ModelMapper().map(popupStore, PopupStoreTO.class);
+        if (popupStore.getThumbnail() == null) to.setThumbnail("thumbnail_default.png");
+
         // 엔티티 -> TO로 매핑
-        return new ModelMapper().map(popupStore, PopupStoreTO.class);
+        return to;
     }
 
     // 2 - 2. Read : 조건에 해당하는 팝업 미리보기
@@ -146,14 +152,14 @@ public class PopupStoreServiceImpl {
         // 3. 썸네일 처리
         if (thumbnail != null && !thumbnail.isEmpty()) {
 //            String thPath = "src/main/resources/static/";
-            String thPath = "C:/popupmarket/";
-            String existingThName = existingPopupStore.getThumbnail();
+            String thPath = "C:/popupmarket/popup_thumbnail/";
+            String existingThName = existingPopupStore.getThumbnail() == null ? "thumbnail_default.png" : existingPopupStore.getThumbnail();
             System.out.println("매개변수로 받은 썸네일 있습니당.");
 
             try {
                 // 기존 썸네일 삭제
                 if (existingThName != null) {
-                    String deleteThPath = thPath + "popup_thumbnail/" + existingThName;
+                    String deleteThPath = thPath + existingThName;
                     System.out.println("삭제 파일은 : " + deleteThPath);
                     boolean deleted = popupStoreFileStorageService.deleteFile(deleteThPath);
                     if (!deleted) {

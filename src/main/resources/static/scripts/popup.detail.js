@@ -19,6 +19,7 @@ function init() {
 	fetch(`/api/popup/bundle/${popupSeq}`)
 		.then(resp=> resp.json())
 		.then(res => {
+			console.log(res);
 			if (res.userRentalPlace.length >= 1) {
 				let placeInsert = '';
 				res.userRentalPlace.forEach((place) => {

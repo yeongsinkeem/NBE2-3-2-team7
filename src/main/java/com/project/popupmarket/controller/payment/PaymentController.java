@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.popupmarket.dto.payment.*;
 import com.project.popupmarket.service.receipts.PaymentService;
 import com.project.popupmarket.service.receipts.TossRequestService;
+import com.project.popupmarket.service.rentalService.RentalPlaceServiceImpl;
 import com.project.popupmarket.util.UserContextUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,14 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final TossRequestService tossRequestService;
     private final UserContextUtil userContextUtil;
+    private final RentalPlaceServiceImpl rentalPlaceServiceImpl;
 
     @Autowired
-    public PaymentController(PaymentService paymentService, TossRequestService tossRequestService, UserContextUtil userContextUtil) {
+    public PaymentController(PaymentService paymentService, TossRequestService tossRequestService, UserContextUtil userContextUtil, RentalPlaceServiceImpl rentalPlaceServiceImpl) {
         this.paymentService = paymentService;
         this.tossRequestService = tossRequestService;
         this.userContextUtil = userContextUtil;
+        this.rentalPlaceServiceImpl = rentalPlaceServiceImpl;
     }
 
     @GetMapping("/payment")
@@ -119,14 +122,12 @@ public class PaymentController {
 
     @GetMapping("/reservation/{rentalPlaceSeq}")
     @Operation(summary = "임대지 예약 리스트 조회")
-    public ResponseEntity<List<ReceiptInfoTO>> reservation(@PathVariable Long rentalPlaceSeq) {
-        List<ReceiptInfoTO> receipts = paymentService.getReceiptsByPlaceSeq(rentalPlaceSeq);
+    public ReservationResponse reservation(@PathVariable Long rentalPlaceSeq) {
+        ReservationResponse resp = new ReservationResponse();
+        resp.setRentalPlaceName(rentalPlaceServiceImpl.findById(rentalPlaceSeq).getName());
+        resp.setReservation(paymentService.getReceiptsByPlaceSeq(rentalPlaceSeq));
 
-        if (!receipts.isEmpty()) {
-            return ResponseEntity.ok(receipts);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return resp;
     }
 
     @PutMapping("/receipt/{orderId}")

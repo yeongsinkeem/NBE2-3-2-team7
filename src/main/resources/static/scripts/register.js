@@ -1,3 +1,18 @@
+const urlParams = new URLSearchParams(window.location.search);
+
+const emailParam = urlParams.get("email");
+const nameParam = urlParams.get("name");
+
+if (nameParam) {
+    document.getElementById('name').value = decodeURIComponent(nameParam);
+    document.getElementById('name').readOnly = true;
+}
+
+if (emailParam) {
+    document.getElementById('email').value = decodeURIComponent(emailParam);
+    document.getElementById('email').readOnly = true;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
 
@@ -41,3 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+document.getElementById('tel').addEventListener('input', function(e) {
+    let input = e.target.value;
+
+    input = input.replace(/\D/g, '');
+
+    if (input.length <= 3) {
+        input = input.replace(/(\d{1,3})/, '$1');
+    } else if (input.length <= 7) {
+        input = input.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+    } else {
+        input = input.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+    }
+
+    e.target.value = input;
+})
