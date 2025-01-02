@@ -92,16 +92,12 @@ function renderPlaceInfo(data) {
 
 	if (data.images.length > 0) {
 		let imageInsert = '';
-		data.images.forEach((image) => {
+		data.images.forEach((item) => {
 			imageInsert += `<div class="w-full h-full flex-shrink-0">
-					<img src="/images/place_detail_images/${image}" class="mx-auto h-full w-full object-cover" alt="">
+					<img src="/images/place_detail/${item.image}" class="mx-auto h-full w-full object-cover" alt="">
 				</div>`
 		})
 		imagesBox.innerHTML = imageInsert;
-	} else {
-		imagesBox.innerHTML = `<div class="w-full h-full flex-shrink-0">
-					<img src="" class="mx-auto h-full w-full object-cover" alt="">
-				</div>`;
 	}
 
 	let infraList = info.infra.split(',');
