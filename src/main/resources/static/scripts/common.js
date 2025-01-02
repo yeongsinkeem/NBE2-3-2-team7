@@ -172,14 +172,14 @@ function getRangeDate(startDate, endDate) {
 function createPriceSlider(min, max) {
 	let slider = document.getElementById('price-slider');
 
-	if(!min) min = 10;
+	if(!min) min = 1;
 	if(!max) max = 1000;
 
 	noUiSlider.create(slider, {
 		start: [min, max],
 		connect: true,
 		range: {
-			'min': 10,
+			'min': 1,
 			'max': 1000
 		},
 		format: {
@@ -202,7 +202,7 @@ function createPriceSlider(min, max) {
 	})
 }
 
-let startPrice = 10;
+let startPrice = 1;
 let endPrice = 1000;
 
 function createPlaceSlider(min, max) {
@@ -333,8 +333,6 @@ function renderPagination(currentPage, totalPage) {
 				</svg>
 			</button>`
 	}
-
-	console.log(pagination);
 
 	return pagination;
 }

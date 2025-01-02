@@ -22,7 +22,7 @@
 	<!-- Image Custom Upload JS -->
 	<script src="/scripts/image.custom.upload.js" defer></script>
 	<!-- My Place View JS -->
-	<script src="/scripts/my.place.view.js"></script>
+	<script src="/scripts/my.place.view.js" defer></script>
 	<style>
 		.noUi-horizontal .noUi-handle {
 			width: 24px;
@@ -48,7 +48,7 @@
 			<form id="edit-popup-form" class="max-w-4xl px-4 flex flex-col w-full bg-white" enctype="multipart/form-data">
 				<div class="flex justify-between pb-2 border-b border-gray-300">
 					<a href="/mypage/rental" class="font-bold p-2">&#10094;&#10094; 목록</a>
-					<button onclick="" class="p-2 text-red-500 rounded-lg font-bold text-sm hover:text-red-700 transition-colors">임대지 삭제</button>
+					<button onclick="deleteRentalPlace()" class="p-2 text-red-500 rounded-lg font-bold text-sm hover:text-red-700 transition-colors">임대지 삭제</button>
 				</div>
 				<div class="flex sm:space-x-2 space-x-0 sm:flex-row flex-col">
 					<div class="space-y-4 flex flex-col flex-shrink-0 justify-center items-center p-8">

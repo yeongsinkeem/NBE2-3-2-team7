@@ -69,25 +69,17 @@ public class RentalPlaceController {
 
     @GetMapping("/rental/user")
     @Operation(summary = "사용자 임대지 리스트")
-    public ResponseEntity<List<RentalPlaceTO>> userRentalList(
-//            @RequestHeader
-    ) {
+    public List<RentalPlaceTO> userRentalList() {
         Long userSeq = userContextUtil.getUserId();
 
-        List<RentalPlaceTO> to = rentalPlaceService.findRentalPlacesByUserId(userSeq);
-
-        if (to.isEmpty()) { // 결과가 비어 있는 경우 204 No Content
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(to);
+        return rentalPlaceService.findRentalPlacesByUserId(userSeq);
     }
 
     @PatchMapping("/rental/{id}")
     @Operation(summary = "임대지 상태 변경 -> [ACTIVE, INACTIVE]")
     public ResponseEntity<Void> updateRentalStatus(
             @PathVariable("id") Long id,
-            @RequestParam String status
+            @RequestBody String status
     ) {
         rentalPlaceService.updateRentalPlaceStatus(id, status);
 
@@ -97,19 +89,15 @@ public class RentalPlaceController {
     @Operation(summary = "임대지 추가")
     @PostMapping(value = "/rental", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> insertRentalPlace( // 임대페이지 데이터 create
-            @RequestPart("rentalPlace") RentalPlaceTO rentalPlaceTO,
-            @RequestPart("thumbnail") MultipartFile thumbnail,
+            @RequestPart("rentalPlace") RentalPlaceTO rentalPlace,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
             @RequestPart("images") List<MultipartFile> images
     ) {
         Long userSeq = userContextUtil.getUserId();
 
-        rentalPlaceTO.setRentalUserSeqId(userSeq);
+        rentalPlace.setRentalUserSeqId(userSeq);
 
-        System.out.println("Rental Place: " + rentalPlaceTO);
-        System.out.println("Thumbnail: " + thumbnail.getOriginalFilename());
-        images.forEach(image -> System.out.println("Image: " + image.getOriginalFilename()));
-
-        rentalPlaceService.insertRentalPlaceWithImages(rentalPlaceTO, thumbnail, images);
+        rentalPlaceService.insertRentalPlaceWithImages(rentalPlace, thumbnail, images);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

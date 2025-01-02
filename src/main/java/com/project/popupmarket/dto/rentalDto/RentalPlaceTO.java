@@ -34,9 +34,9 @@ public class RentalPlaceTO {
     private Set<String> rentalPlaceImages;
 
     public RentalPlaceTO(Long id, Long rentalUserSeqId, String thumbnail, String zipcode,
-                          BigDecimal price, String address, String addrDetail, String description,
-                          String infra, String name, String capacity, String nearbyAgeGroup,
-                          Instant registeredAt, String status) {
+                            BigDecimal price, String address, String addrDetail, String description,
+                            String infra, String name, String capacity, String nearbyAgeGroup,
+                            Instant registeredAt, String status) {
         this.id = id;
         this.rentalUserSeqId = rentalUserSeqId;
         this.thumbnail = thumbnail;

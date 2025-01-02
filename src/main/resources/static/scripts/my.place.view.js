@@ -1,3 +1,4 @@
+const placeSeq = window.location.pathname.split('/').pop();
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -9,11 +10,7 @@ function addInfra(btn) {
 	const val = btn.dataset.val;
 	if (!infraList.includes(val))	{
 		infraList.push(val);
-		console.log(infraList);
 		renderInfra();
-	} else {
-		console.log('no add : ' , val)
-		return
 	}
 }
 
@@ -33,4 +30,17 @@ function renderInfra() {
 function removeInfra(index) {
 	infraList.splice(index, 1);
 	renderInfra();
+}
+
+function deleteRentalPlace() {
+	fetch(`/api/rental/${placeSeq}`, {
+		method: 'DELETE'
+	})
+		.catch(err => {
+			alert('삭제중 에러가 발생했습니다.');
+			console.log(err)
+		})
+		.finally(() => {
+			window.location.href = '/mypage/rental';
+		});
 }
