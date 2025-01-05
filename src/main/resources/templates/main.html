@@ -33,20 +33,20 @@
 <body class="flex flex-col min-h-screen">
 <header th:replace="~{fragments/header.html :: header}"></header>
 <main class="flex-grow flex flex-col items-center">
-    <article class="relative w-full min-h-96 max-h-128 flex overflow-hidden bg-slate-500">
+    <article class="relative w-full min-h-96 max-h-128 flex overflow-hidden bg-white">
         <!-- 슬라이드 배너 컨테이너 -->
         <div id="slide-container" class="flex w-full transition-transform duration-1000" style="transform: translateX(0%);">
             <!-- 슬라이드 항목 1 -->
             <div class="w-full h-full flex-shrink-0">
-                <img src="" class="mx-auto h-full w-full object-cover" alt="">
+                <img src="/images/slides/slide1.png" class="mx-auto h-full w-full object-contain" alt="">
             </div>
             <!-- 슬라이드 항목 2 -->
             <div class="w-full h-full flex-shrink-0">
-                <img src="" class="mx-auto h-full w-full object-cover" alt="">
+                <img src="/images/slides/slide2.png" class="mx-auto h-full w-full object-contain" alt="">
             </div>
             <!-- 슬라이드 항목 3 -->
             <div class="w-full h-full flex-shrink-0">
-                <img src="" class="mx-auto h-full w-full object-cover" alt="">
+                <img src="/images/slides/slide3.png" class="mx-auto h-full w-full object-contain" alt="">
             </div>
         </div>
         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4 items-center">

@@ -57,7 +57,6 @@ public class RentalPlace {
     @Column(name = "name")
     private String name;
 
-    @Size(max = 255)
     @Column(name = "area")
     private Integer area;
 
