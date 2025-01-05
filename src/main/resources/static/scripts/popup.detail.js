@@ -108,6 +108,7 @@ function invitation() {
 		})
 			.then(resp => {
 				if (resp.ok) {
+					alert("입점 요청을 했습니다.")
 					window.location.reload();
 				}
 			})
