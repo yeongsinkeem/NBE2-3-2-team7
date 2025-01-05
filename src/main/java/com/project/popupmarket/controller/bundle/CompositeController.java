@@ -48,7 +48,7 @@ public class CompositeController {
         return ResponseEntity.ok(new MainRentalAndPopupTO(popupStoreService.findByLimit(), rentalPlaceService.findWithLimit()));
     }
 
-    @GetMapping("/popup/bundle/{popupSeq}")
+    @GetMapping("/popup/view/{popupSeq}")
     @Operation(summary = "개별 팝업 조회 (feat. 권유 목록)" )
     public ResponseEntity<PopupDetailRespTO> getPopupBySeqWithPlaceInfo(@PathVariable Long popupSeq) {
         Long userSeq = userContextUtil.getUserId();
@@ -62,7 +62,7 @@ public class CompositeController {
         return ResponseEntity.ok(new PopupDetailRespTO(rentalPlaceService.findUserRentalPlaceInfo(userSeq, popupSeq), new PopupStoreImgDTO(to, imgLst)));
     }
 
-    @GetMapping("/rental/bundle/{placeSeq}")
+    @GetMapping("/rental/view/{placeSeq}")
     @Operation(summary = "개별 임대지 조회 (feat. 예약 날짜)")
     public ResponseEntity<PlaceDetailRespTO> getPlaceBySeqWithReservationPeriod(@PathVariable Long placeSeq) {
         RentalPlaceTO to = rentalPlaceService.findById(placeSeq);

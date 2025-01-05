@@ -209,19 +209,19 @@ let endPrice = 1000;
 function createPlaceSlider(min, max) {
 	let slider = document.getElementById('place-slider');
 
-	if(!min) min = 0;
-	if(!max) max = 100;
+	if(!min) min = 1;
+	if(!max) max = 500;
 
 	noUiSlider.create(slider, {
 		start: [min, max],
 		connect: true,
 		range: {
-			'min': 0,
-			'max': 100
+			'min': 1,
+			'max': 500
 		},
 		format: {
 			to: function (value) {
-					if(value >= 100) return Math.round(value) + '평 이상';
+					if(value >= 500) return Math.round(value) + '평 이상';
 					return Math.round(value) + '평';
 			},
 			from: function (value) {
@@ -239,8 +239,8 @@ function createPlaceSlider(min, max) {
 	})
 }
 
-let startArea = 0;
-let endArea = 100;
+let startArea = 1;
+let endArea = 500;
 
 let calendarInstance = null;
 

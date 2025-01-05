@@ -30,7 +30,7 @@ periodInput.addEventListener('change', (e)=> {
 })
 
 function init() {
-	fetch(`/api/rental/bundle/${placeSeq}`)
+	fetch(`/api/rental/view/${placeSeq}`)
 		.then(resp=> resp.json())
 		.then(res => {
 			console.log(res);
@@ -111,7 +111,7 @@ function renderPlaceInfo(data) {
 
 	placeTitle.innerHTML = info.name;
 	ageGroup.innerHTML = info.nearbyAgeGroup;
-	placeArea.innerHTML = `${info.capacity}평`;
+	placeArea.innerHTML = `${info.area}평`;
 	placeDescription.innerHTML = info.description;
 	placeAddress.innerHTML = `[${info.zipcode}] ${info.address}, ${info.addrDetail}`;
 	placePrice.innerHTML = `${info.price.toLocaleString()}원 / 일`

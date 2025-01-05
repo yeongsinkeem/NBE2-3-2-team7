@@ -11,8 +11,8 @@ function init() {
     fetch(`/api/reservation/${placeSeq}`)
         .then(res => res.json())
         .then(res => {
-            console.log(res);
-            box.innerHTML = renderReservation(res)
+            placeName.innerHTML = res.rentalPlaceName
+            box.innerHTML = renderReservation(res.reservation)
         })
         .catch(err => console.log(err));
 }
@@ -21,7 +21,6 @@ function renderReservation(data) {
     let result = '';
 
     if (data.length >= 1) {
-        placeName.innerHTML = data[0].rentalPlaceName
         data.forEach((item) => {
             switch (item.reservationStatus) {
                 case '결제 완료':

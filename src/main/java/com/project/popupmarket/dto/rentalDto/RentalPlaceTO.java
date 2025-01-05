@@ -26,7 +26,7 @@ public class RentalPlaceTO {
     private String description;
     private String infra;
     private String name;
-    private String capacity;
+    private Integer area;
     private String nearbyAgeGroup;
     private Instant registeredAt;
     private String status;
@@ -35,7 +35,7 @@ public class RentalPlaceTO {
 
     public RentalPlaceTO(Long id, Long rentalUserSeqId, String thumbnail, String zipcode,
                             BigDecimal price, String address, String addrDetail, String description,
-                            String infra, String name, String capacity, String nearbyAgeGroup,
+                            String infra, String name, Integer area, String nearbyAgeGroup,
                             Instant registeredAt, String status) {
         this.id = id;
         this.rentalUserSeqId = rentalUserSeqId;
@@ -47,7 +47,7 @@ public class RentalPlaceTO {
         this.description = description;
         this.infra = infra;
         this.name = name;
-        this.capacity = capacity;
+        this.area = area;
         this.nearbyAgeGroup = nearbyAgeGroup;
         this.registeredAt = registeredAt;
         this.status = status;

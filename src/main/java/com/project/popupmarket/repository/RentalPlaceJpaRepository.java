@@ -43,7 +43,7 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
     @Query(value = "SELECT rp " +
             "FROM RentalPlace rp " +
             "WHERE rp.status = 'ACTIVE' " +
-            "AND CAST(rp.capacity as Integer) BETWEEN :minCapacity AND :maxCapacity " +
+            "AND rp.area BETWEEN :minCapacity AND :maxCapacity " +
             "AND (:location IS NULL OR rp.address LIKE %:location%) " +
             "AND rp.price BETWEEN :minPrice AND :maxPrice " +
             "AND NOT EXISTS (" +
@@ -55,8 +55,8 @@ public interface RentalPlaceJpaRepository extends JpaRepository<RentalPlace, Lon
             "ORDER BY " +
             "CASE WHEN :sorting = 'registered_desc' THEN rp.registeredAt END DESC, " +
             "CASE WHEN :sorting = 'registered_asc' THEN rp.registeredAt END ASC, " +
-            "CASE WHEN :sorting = 'area_desc' THEN rp.capacity END DESC, " +
-            "CASE WHEN :sorting = 'area_asc' THEN rp.capacity END ASC, " +
+            "CASE WHEN :sorting = 'area_desc' THEN rp.area END DESC, " +
+            "CASE WHEN :sorting = 'area_asc' THEN rp.area END ASC, " +
             "CASE WHEN :sorting = 'price_desc' THEN rp.price END DESC, " +
             "CASE WHEN :sorting = 'price_asc' THEN rp.price END ASC, " +
             "CASE WHEN :sorting IS NULL OR :sorting = '' THEN rp.registeredAt END DESC," +

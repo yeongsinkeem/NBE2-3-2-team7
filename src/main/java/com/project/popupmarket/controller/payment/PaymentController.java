@@ -130,7 +130,7 @@ public class PaymentController {
         return resp;
     }
 
-    @PutMapping("/receipt/{orderId}")
+    @PatchMapping("/receipt/{orderId}")
     @Operation(summary = "임대지 결제 환불")
     public ResponseEntity<String> receipt(
             @PathVariable String orderId

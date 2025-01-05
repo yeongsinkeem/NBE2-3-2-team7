@@ -50,7 +50,7 @@ function init() {
 					insert += `<a class="group drop-shadow-lg relative p-4 border m-2 rounded-lg border-gray-300" href="/rental/detail/${item.id}">
 							<div class="absolute w-full h-full bg-gray-300 opacity-0 group-hover:opacity-50 transition left-0 top-0"></div>
 							<div class="mt-2 block relative overflow-hidden rounded-lg border border-gray-400">
-								<img class="w-full size-40 object-cover bg-gray-100" src="/images/place_thumbnail/${item.thumbnail}" alt="Project">
+								<img class="w-full h-46 object-contain bg-gray-100" src="/images/place_thumbnail/${item.thumbnail}" alt="Project">
 									<div class="absolute bottom-1 end-1 opacity-0 group-hover:opacity-100 transition">
 										<div class="flex items-center z-10 gap-x-1 py-1 px-2 bg-white border border-gray-200 text-gray-800 rounded-lg">
 											<svg class="shrink-0 size-3" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -61,7 +61,7 @@ function init() {
 							<div class="space-y-2 mt-4">
 								<h3 class="text-lg font-semibold text-gray-900">${truncateString(item.name)}</h3>
 								<div class="flex justify-between">
-									<span>${item.capacity}평</span>
+									<span>${item.area}평</span>
 									<span>${item.price.toLocaleString()}원 / 일</span>
 								</div>
 							</div>

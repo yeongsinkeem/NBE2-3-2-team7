@@ -21,7 +21,7 @@ function renderInvitation(data) {
     if (data.length >= 1) {
         data.forEach(item => {
             result += `<a href="/rental/detail/${item.id}" class="p-4 hover:bg-gray-200 transition-colors items-center space-y-4 sm:space-y-0 space-x-0 sm:space-x-4 bg-white flex sm:flex-row flex-col border border-gray-300 rounded-lg">
-            <img class="border border-gray-300 min-h-40 max-h-40 w-full sm:max-w-60 object-cover bg-gray-100" src="/images/place_thumbnail/${item.thumbnail}" alt="">
+            <img class="border border-gray-300 min-h-40 max-h-40 w-full sm:max-w-60 object-contain bg-gray-100" src="/images/place_thumbnail/${item.thumbnail}" alt="">
                 <div class="flex flex-col space-y-4 w-full">
                     <span class="font-bold text-lg">${item.name}</span>
                     <span class="font-bold text-sm">[${item.zipcode}] ${item.address}, ${item.addrDetail}</span>
