@@ -52,9 +52,9 @@ public class RentalPlaceController {
 //        GET /list?minArea=30&maxArea=70&location=서울&minPrice=100000&maxPrice=9000000&page=0
         //Capacity, Price, Name, Thumbnail
 
-        minCapacity = (minCapacity != null) ? minCapacity : 0;
-        maxCapacity = (maxCapacity != null) ? maxCapacity : 100;
-        minPrice = (minPrice != null) ? minPrice : new BigDecimal(0);
+        minCapacity = (minCapacity != null) ? minCapacity : 1;
+        maxCapacity = (maxCapacity != null) ? maxCapacity : 500;
+        minPrice = (minPrice != null) ? minPrice : new BigDecimal(1);
         maxPrice = (maxPrice != null) ? maxPrice : new BigDecimal(10000000);
 
         Pageable pageable = PageRequest.of(page, 9);

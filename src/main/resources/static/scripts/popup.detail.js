@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', ()=> {
 })
 
 function init() {
-	fetch(`/api/popup/bundle/${popupSeq}`)
+	fetch(`/api/popup/view/${popupSeq}`)
 		.then(resp=> resp.json())
 		.then(res => {
 			console.log(res);

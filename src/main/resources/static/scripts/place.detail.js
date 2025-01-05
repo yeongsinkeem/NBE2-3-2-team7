@@ -30,7 +30,7 @@ periodInput.addEventListener('change', (e)=> {
 })
 
 function init() {
-	fetch(`/api/rental/bundle/${placeSeq}`)
+	fetch(`/api/rental/view/${placeSeq}`)
 		.then(resp=> resp.json())
 		.then(res => {
 			console.log(res);

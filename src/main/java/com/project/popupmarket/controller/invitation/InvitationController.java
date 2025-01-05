@@ -40,7 +40,7 @@ public class InvitationController {
     }
 
     @DeleteMapping("/invitation")
-    @Operation(summary = "입점 요청 삭제")
+    @Operation(summary = "입점 요청 삭제") // 까먹고 바인딩 안됨 해당 항목 페이지에 추가 필요
     public ResponseEntity<String> removeInvitation(@RequestBody InvitationTO invitation) {
 
         boolean flag = invitationService.removeInvitation(invitation);

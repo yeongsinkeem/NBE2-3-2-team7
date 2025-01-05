@@ -27,6 +27,12 @@ editForm.addEventListener('submit', (e) => {
 
 	if (Number(priceInput.value) < 10000) {
 		alert('10,000원 이상으로 등록해주세요.');
+	} else if (Number(priceInput.value) > 10000000) {
+		alert('10,000,000원 이하로 등록해주세요.');
+	}
+
+	if (Number(areaInput.value) > 500) {
+		alert('500평 이하로 등록해주세요.');
 	}
 
 	let formData = new FormData();
@@ -41,7 +47,7 @@ editForm.addEventListener('submit', (e) => {
 		"addrDetail": addrDetailInput.value,
 		"infra": infra,
 		"nearbyAgeGroup": ageInput.value,
-		"capacity": areaInput.value,
+		"area": areaInput.value,
 		"description": descriptionInput.value,
 	}
 
@@ -82,7 +88,7 @@ function renderPlace(data) {
 	addressInput.value = data.address;
 	addrDetailInput.value = data.addrDetail;
 	ageInput.value = data.nearbyAgeGroup;
-	areaInput.value = data.capacity;
+	areaInput.value = data.area;
 	descriptionInput.value = data.description;
 	infraList = data.infra.split(',');
 	fetch(`/images/place_thumbnail/${data.thumbnail}`)
@@ -142,3 +148,18 @@ function deleteRentalPlace() {
 			window.location.href = '/mypage/rental';
 		});
 }
+
+priceInput.addEventListener('input', function(e) {
+	// 숫자 외의 문자가 입력되면 자동으로 삭제
+	if (Number(e.target.value) > 10000000) {
+		e.target.value = "10000000";
+	}
+	e.target.value = e.target.value.replace(/[^0-9]/g, "");
+});
+
+areaInput.addEventListener('input', function(e) {
+	if (Number(e.target.value) > 500) {
+		e.target.value = "500";
+	}
+	e.target.value = e.target.value.replace(/[^0-9]/g, "");
+})

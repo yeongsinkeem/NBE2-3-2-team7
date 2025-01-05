@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -59,8 +58,8 @@ public class RentalPlace {
     private String name;
 
     @Size(max = 255)
-    @Column(name = "capacity")
-    private String capacity;
+    @Column(name = "area")
+    private Integer area;
 
     @Size(max = 255)
     @Column(name = "nearby_age_group")

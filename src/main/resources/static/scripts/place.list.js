@@ -61,7 +61,7 @@ function init() {
 							<div class="space-y-2 mt-4">
 								<h3 class="text-lg font-semibold text-gray-900">${truncateString(item.name)}</h3>
 								<div class="flex justify-between">
-									<span>${item.capacity}평</span>
+									<span>${item.area}평</span>
 									<span>${item.price.toLocaleString()}원 / 일</span>
 								</div>
 							</div>

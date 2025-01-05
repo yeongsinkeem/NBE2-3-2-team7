@@ -14,12 +14,7 @@ document.addEventListener('DOMContentLoaded' ,() => {
 
 function init() {
 	checkParam()
-	fetch(`/api/payment?seq=${placeSeq}&start=${start}&end=${end}`,{
-		method: 'GET',
-		headers: {
-			'Authorization': `Bearer ${1}`
-		}
-	})
+	fetch(`/api/payment?seq=${placeSeq}&start=${start}&end=${end}`)
 		.then(resp => {
 			if (!resp.ok) {
 				throw new Error(err.message || '이미 예약된 날짜입니다.');
