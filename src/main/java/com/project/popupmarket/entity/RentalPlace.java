@@ -46,7 +46,7 @@ public class RentalPlace {
     private String addrDetail;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Size(max = 255)
