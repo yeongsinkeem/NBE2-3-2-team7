@@ -14,7 +14,6 @@ import java.util.Objects;
 
 @Getter
 @Setter
-// Entity 관련 애너테이션
 // Embeddable : 내장될 클래스에 사용
 @Embeddable
 public class PopupStoreImageListId implements Serializable {
@@ -30,6 +29,23 @@ public class PopupStoreImageListId implements Serializable {
     @Column(name = "image", nullable = false)
     private String image;
 
+    // 1. 기본 생성자
+    public PopupStoreImageListId() {}
+
+    // 2. 필드 기반 생성자
+    public PopupStoreImageListId(Long popupStoreSeq, String image) {
+        this.popupStoreSeq = popupStoreSeq;
+        this.image = image;
+    }
+
+    @Override
+    public String toString() {
+        return "PopupStoreImageListId { " +
+                "popupStoreSeq = " + popupStoreSeq +
+                ", image = '" + image + '\'' +
+                '}';
+    }
+    // 3 - 1. equals()
     // 팝업스토어 번호와 이미지 값이 같으면 두 객체 동일하다고 판단
     @Override
     public boolean equals(Object o) {
@@ -40,6 +56,7 @@ public class PopupStoreImageListId implements Serializable {
                 Objects.equals(this.popupStoreSeq, entity.popupStoreSeq);
     }
 
+    // 3 - 2. hashCode()
     // 객체의 해시코드 생성
     @Override
     public int hashCode() {
