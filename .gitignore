@@ -1,56 +1,14 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# macOS 시스템 파일
+.DS_Store
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# Windows 시스템 파일
+Thumbs.db
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.production
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-/src/main/java/com/project/popupmarket/controller/ViewController.java
-
-
-### OAuth2 ###
-application-oauth.properties
-application-oauth.yml
-src/main/resources/application-oauth.properties
-src/main/resources/application-oauth.yml
-
-### Security Keys ###
-*.pem
-*.key
-*.p12
-*.jks
-
-# Properties containing sensitive information
-**/resources/oauth2.properties
-**/resources/security.properties
-**/resources/application-secret.properties
+# 로그 파일
+*.log

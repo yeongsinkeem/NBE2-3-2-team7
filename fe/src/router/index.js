@@ -1,0 +1,17 @@
+import { createRouter, createWebHistory } from 'vue-router';
+// import Home from '../views/Home.vue';
+
+const routes = [
+  {
+    path: '/',               // 홈 페이지
+    name: 'Home',
+    component: null
+  },
+];
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+});
+
+export default router;

@@ -1,0 +1,45 @@
+spring:
+  profiles:
+    active: local
+  config:
+    import: optional:file:.env[.properties]
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_SECRET_KEY}
+            scope: ${GOOGLE_SCOPE}
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            authorization-grant-type: ${GOOGLE_AUTH_TYPE}
+            client-name: ${GOOGLE_CLIENT_NAME}
+        provider:
+          google:
+            authorization-uri: ${GOOGLE_AUTH_URI}
+            token-uri: ${GOOGLE_TOKEN_URI}
+            user-info-uri: ${GOOGLE_INFO_URI}
+            user-name-attribute: ${GOOGLE_USERNAME_ATTR}
+  servlet:
+    multipart:
+      max-file-size: 2MB        # 단일 파일 최대 크기
+      max-request-size: 50MB     # 요청당 전체 파일 크기
+      enabled: true
+      location: ${java.io.tmpdir}
+server:
+  shutdown: graceful
+  servlet:
+    session:
+      timeout: 0
+# 임시 경로 AWS S3로 변경 예정
+app:
+  upload-path: C:/popupmarket/user_brand/
+  resource-path: file:C:/popupmarket/
+  default-profile-image: brand_default.png
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret-key: ${JWT_SECRET_KEY}
+payment:
+  toss:
+    test_client_api_key: ${TOSS_TEST_CLIENT_KEY}
+    test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
