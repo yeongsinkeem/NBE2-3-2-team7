@@ -18,7 +18,7 @@
     <!-- Common JS -->
     <script src="/scripts/common.js" defer></script>
     <!-- Main JS -->
-    <script src="/scripts/main.js"></script>
+    <script src="/scripts/main.js" defer></script>
     <style>
         /* 테일윈드 클래스를 사용하여 손잡이 크기 조정 */
         .noUi-horizontal .noUi-handle {
@@ -33,20 +33,20 @@
 <body class="flex flex-col min-h-screen">
 <header th:replace="~{fragments/header.html :: header}"></header>
 <main class="flex-grow flex flex-col items-center">
-    <article class="relative w-full min-h-96 max-h-128 flex overflow-hidden bg-slate-500">
+    <article class="relative w-full min-h-96 max-h-128 flex overflow-hidden bg-white">
         <!-- 슬라이드 배너 컨테이너 -->
         <div id="slide-container" class="flex w-full transition-transform duration-1000" style="transform: translateX(0%);">
             <!-- 슬라이드 항목 1 -->
             <div class="w-full h-full flex-shrink-0">
-                <img src="" class="mx-auto h-full w-full object-cover" alt="">
+                <img src="/images/slides/slide1.png" class="mx-auto h-full w-full object-contain" alt="">
             </div>
             <!-- 슬라이드 항목 2 -->
             <div class="w-full h-full flex-shrink-0">
-                <img src="" class="mx-auto h-full w-full object-cover" alt="">
+                <img src="/images/slides/slide2.png" class="mx-auto h-full w-full object-contain" alt="">
             </div>
             <!-- 슬라이드 항목 3 -->
             <div class="w-full h-full flex-shrink-0">
-                <img src="" class="mx-auto h-full w-full object-cover" alt="">
+                <img src="/images/slides/slide3.png" class="mx-auto h-full w-full object-contain" alt="">
             </div>
         </div>
         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4 items-center">
@@ -61,8 +61,8 @@
             </button>
         </div>
     </article>
-    <section class="flex mt-10">
-        <div class="flex w-full flex-col">
+    <section class="flex w-full justify-center mt-10">
+        <div class="flex max-w-7xl w-full px-4 flex-col">
             <div class="flex">
                 <button id="main-filter-place" onclick="findPlace()" class="relative transform text-white transition-all duration-150 p-2 rounded-t-md font-bold bg-[#3FB8AF]">
                     장소 찾아요🙋
@@ -71,7 +71,7 @@
                     팝업 찾아요🙋
                 </button>
             </div>
-            <div class="z-10 bg-white max-w-7xl border-t-2 border-b-2 border-[#3FB8AF] mx-auto p-4 flex items-center justify-center">
+            <div class="z-10 bg-white max-w-7xl border-t-2 border-b-2 border-[#3FB8AF] w-full p-4 flex items-center justify-center min-h-28">
                 <div id="main-filter-box" class="flex flex-col min-w-80 lg:flex-row lg:space-y-0 lg:space-x-4 space-y-4">
                     <div class="flex space-x-4">
                         <div class="bg-white px-4 py-2 flex-grow rounded-md border border-gray-300">
@@ -84,7 +84,7 @@
                         <div class="bg-white px-4 py-2 flex-shrink-0 border border-gray-300 rounded-md">
                             <label for="location" class="font-bold">지역</label>
                             <select id="location" class="w-full px-1">
-                                <option value="all">지역</option>
+                                <option value="">전체</option>
                                 <option value="서울">서울</option>
                                 <option value="부산">부산</option>
                                 <option value="대구">대구</option>
@@ -117,7 +117,7 @@
                         <input type="text" id="quick-calendar" placeholder="기간을 선택하세요." class="w-full">
                     </div>
 
-                    <button id="find-item" class="py-2 bg-[#3FB8AF] text-white font-bold flex-shrink-0 flex-grow-0 px-4 rounded-md hover:bg-[#2c817c] transition-colors duration-150">
+                    <button onclick="locationPlace()" id="find-item" class="py-2 bg-[#3FB8AF] text-white font-bold flex-shrink-0 flex-grow-0 px-4 rounded-md hover:bg-[#2c817c] transition-colors duration-150">
                         조회
                     </button>
                 </div>
@@ -127,40 +127,40 @@
 
     <section class="mt-10 w-full px-4">
         <div class="border-2 max-w-7xl  mx-auto rounded-2xl ">
-            <h3 class="pl-8 mt-4 text-2xl">등록 데이터 10개</h3>
+            <h3 class="pl-8 mt-4 text-2xl">최근 등록된 임대지</h3>
             <div class="relative rounded-xl overflow-auto my-4"><!-- Snap Point -->
                 <!-- Contents -->
-                <div class="relative w-full flex gap-6 snap-x list_scrollbar overflow-x-auto pb-6">
-                    <div class="snap-center shrink-0 first:pl-8 last:pr-8">
-                        <a class="rounded-md flex flex-col p-4 shadow-xl bg-white border hover:transform hover:translate-y-[-10px] transition-transform duration-200" href="#">
-                            <img class="shrink-0 w-80 h-40 rounded-lg shadow-xl bg-white" src="https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80" alt="">
-                            <span class="my-4 font-bold">제목</span>
-                            <div class="flex justify-between">
-                                <p>가격</p>
-                                <p>장소</p>
-                            </div>
-                        </a>
-                    </div>
+                <div id="place-box" class="relative w-full flex gap-6 snap-x list_scrollbar overflow-x-auto pb-6">
+<!--                    <div class="snap-center shrink-0 first:pl-8 last:pr-8">-->
+<!--                        <a class="rounded-md flex flex-col p-4 shadow-xl bg-white border hover:transform hover:translate-y-[-10px] transition-transform duration-200" href="#">-->
+<!--                            <img class="shrink-0 w-80 h-40 rounded-lg shadow-xl bg-white" src="https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80" alt="">-->
+<!--                            <span class="my-4 font-bold">제목</span>-->
+<!--                            <div class="flex justify-between">-->
+<!--                                <p>가격</p>-->
+<!--                                <p>장소</p>-->
+<!--                            </div>-->
+<!--                        </a>-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>
     </section>
     <section class="mt-10 w-full px-4">
         <div class="border-2 max-w-7xl mx-auto rounded-2xl ">
-            <h3 class="pl-8 mt-4 text-2xl">등록 데이터 10개</h3>
+            <h3 class="pl-8 mt-4 text-2xl">최근 등록된 팝업</h3>
             <div class="relative rounded-xl overflow-auto my-4"><!-- Snap Point -->
                 <!-- Contents -->
-                <div class="relative w-full flex gap-6 snap-x list_scrollbar overflow-x-auto pb-6">
-                    <div class="snap-center shrink-0 first:pl-8 last:pr-8">
-                        <a class="rounded-md flex flex-col p-4 shadow-xl bg-white border hover:transform hover:translate-y-[-10px] transition-transform duration-200" href="#">
-                            <img class="shrink-0 w-80 h-40 rounded-lg shadow-xl bg-white" src="https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80" alt="">
-                            <span class="my-4 font-bold">제목</span>
-                            <div class="flex justify-between">
-                                <p>가격</p>
-                                <p>장소</p>
-                            </div>
-                        </a>
-                    </div>
+                <div id="popup-box" class="relative w-full flex gap-6 snap-x list_scrollbar overflow-x-auto pb-6">
+<!--                    <div class="snap-center shrink-0 first:pl-8 last:pr-8">-->
+<!--                        <a class="rounded-md flex flex-col p-4 shadow-xl bg-white border hover:transform hover:translate-y-[-10px] transition-transform duration-200" href="#">-->
+<!--                            <img class="shrink-0 w-80 h-40 rounded-lg shadow-xl bg-white" src="https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80" alt="">-->
+<!--                            <span class="my-4 font-bold">제목</span>-->
+<!--                            <div class="flex justify-between">-->
+<!--                                <p>가격</p>-->
+<!--                                <p>장소</p>-->
+<!--                            </div>-->
+<!--                        </a>-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>
@@ -168,5 +168,4 @@
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
-
 </html>

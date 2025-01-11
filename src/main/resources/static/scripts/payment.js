@@ -1,45 +1,116 @@
-document.addEventListener('DOMContentLoaded' ,() => {
-	main();
-})
+const urlParams = new URLSearchParams(window.location.search);
 
-async function main() {
-	const button = document.getElementById("payment-button");
-	// ------  결제위젯 초기화  ------
-	const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
-	const tossPayments = TossPayments(clientKey);
-	// 회원 결제 - 테스트 키
-	const customerKey = "5MYfWyBKczHDQVF1F6xvm";
-	const widgets = tossPayments.widgets({
+const placeSeq = urlParams.get("place");
+const start = urlParams.get("start");
+const end = urlParams.get("end");
+
+const orderId = generateRandomString();
+
+let infoVal = {};
+
+document.addEventListener('DOMContentLoaded' ,() => {
+	init();
+});
+
+function init() {
+	checkParam()
+	fetch(`/api/payment?seq=${placeSeq}&start=${start}&end=${end}`)
+		.then(resp => {
+			if (!resp.ok) {
+				throw new Error(err.message || '이미 예약된 날짜입니다.');
+			}
+			return resp.json();
+		})
+		.then(res => {
+				setData(res);
+		})
+		.catch(err => {
+			alert('[에러] : ', err.message);
+			window.history.back();
+		});
+}
+
+async function tossApi() {
+	stagingPayment();
+	const clientKey = 'test_ck_LlDJaYngroyq7XvpoONv3ezGdRpX'
+	const customerKey = infoVal.customerKey;
+	const tossPayments =  TossPayments(clientKey);
+	const payment = tossPayments.payment({
 		customerKey,
 	});
 
-	// ------ 주문의 결제 금액 설정 ------
-	await widgets.setAmount({
+	const amount = {
 		currency: "KRW",
-		value: 50000,
-	});
+		value: getPeriod(start, end) * infoVal.price,
+	};
 
-	await Promise.all([
-		// ------  결제 UI 렌더링 ------
-		widgets.renderPaymentMethods({
-			selector: "#payment-method",
-			variantKey: "DEFAULT",
-		}),
-		// ------  이용약관 UI 렌더링 ------
-		widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" }),
-	]);
+	const tossInfo = {
+		method: "CARD", // 카드 및 간편결제
+		amount,
+		orderId: orderId,
+		orderName: infoVal.placeName,
+		successUrl: window.location.origin + "/payment/success", // 결제 요청이 성공하면 리다이렉트되는 URL
+		failUrl: window.location.origin + "/payment/fail", // 결제 요청이 실패하면 리다이렉트되는 URL
+		customerEmail: infoVal.userEmail,
+		customerName: infoVal.userName,
+		card: {
+			useEscrow: false,
+			flowMode: "DEFAULT",
+			useCardPoint: false,
+			useAppCardOnly: false,
+		},
+	}
 
+	await payment.requestPayment(tossInfo);
+}
 
-	// ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
-	button.addEventListener("click", async function () {
-		await widgets.requestPayment({
-			orderId: "6qDE_OK0FduW7NtJBeYPl",
-			orderName: "토스 티셔츠 외 2건",
-			successUrl: window.location.origin + "/success.html",
-			failUrl: window.location.origin + "/fail.html",
-			customerEmail: "customer123@gmail.com",
-			customerName: "김토스",
-			customerMobilePhone: "01012341234",
-		});
-	});
+function stagingPayment(){
+	fetch(`/api/payment`, {
+		method: 'POST',
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			"orderId":orderId,
+			"rentalPlaceSeq":placeSeq,
+			"startDate":start,
+			"endDate":end,
+			"amount":getPeriod(start, end) * infoVal.price,
+		})
+	})
+		.then(resp => resp.json())
+		.then(res => {
+			if (res.status === 200) {
+				console.log(res.status, ' Ok!');
+			} else {
+				console.log(res.status, ' No..')
+			}
+		})
+		.catch(err => console.log(err));
+}
+
+function checkParam() {
+	if (start === '' || end === '' ||
+		start === null || end === null ||
+		start === undefined || end === undefined) {
+		alert('잘못된 접근입니다.');
+		window.history.back();
+	}
+}
+
+function setData(info) {
+	document.getElementById('user-name').innerText = info.userName;
+	document.getElementById('user-email').innerText = info.userEmail;
+	document.getElementById('user-tel').innerText = info.userTel;
+	document.getElementById('place-name').innerText = info.placeName;
+	document.getElementById('rental-period').innerText = getRangeDate(start, end);
+	document.getElementById('day-price').innerText = info.price.toLocaleString() + '원 / 일';
+	document.getElementById('total-price').innerText = (getPeriod(start, end) * info.price).toLocaleString() + '원';
+	document.getElementById('full-address').innerText = `[${info.area}] ${info.address}, ${info.addrDetail}`;
+
+	infoVal = info;
+}
+
+function generateRandomString() {
+	return window.btoa(Math.random()).slice(0, 20);
 }

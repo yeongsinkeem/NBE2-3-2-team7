@@ -30,9 +30,9 @@ public class RentalPlace {
     @Column(name = "thumbnail")
     private String thumbnail;
 
-    @Size(max = 255)
-    @Column(name = "area")
-    private String area;
+    @Size(min = 5, max = 5)
+    @Column(name = "zipcode", length = 5, nullable = false)
+    private String zipcode;
 
     @Column(name = "price", precision = 10)
     private BigDecimal price;
@@ -46,7 +46,7 @@ public class RentalPlace {
     private String addrDetail;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Size(max = 255)
@@ -57,9 +57,8 @@ public class RentalPlace {
     @Column(name = "name")
     private String name;
 
-    @Size(max = 255)
-    @Column(name = "capacity")
-    private String capacity;
+    @Column(name = "area")
+    private Integer area;
 
     @Size(max = 255)
     @Column(name = "nearby_age_group")
@@ -77,9 +76,6 @@ public class RentalPlace {
 
     @OneToMany(mappedBy = "rentalPlaceSeq", cascade = CascadeType.ALL)
     private Set<PlaceRequest> popupStores = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "rentalPlaceSeq")
-    private Set<Receipt> receipts = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "rentalPlaceSeq")
     private Set<RentalPlaceImageList> rentalPlaceImageLists = new LinkedHashSet<>();

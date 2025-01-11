@@ -1,6 +1,8 @@
 package com.project.popupmarket.repository;
 
 import com.project.popupmarket.entity.PopupStore;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,14 +25,31 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             "(:type IS NULL OR p.type = :type) AND " +
             "(:targetAgeGroup IS NULL OR p.targetAgeGroup = :targetAgeGroup) AND " +
             "(:startDate IS NULL OR p.startDate >= :startDate) AND " +
-            "(:endDate IS NULL OR p.endDate <= :endDate)")
-    List<PopupStore> findByFilter(
+            "(:endDate IS NULL OR p.endDate <= :endDate)" +
+            "ORDER BY " +
+            "CASE WHEN :sorting = 'registered_desc' THEN p.registeredAt END DESC, " +
+            "CASE WHEN :sorting = 'registered_asc' THEN p.registeredAt END ASC, " +
+            "CASE WHEN :sorting IS NULL OR :sorting = '' THEN p.registeredAt END DESC," +
+            "CASE WHEN :sorting NOT IN ('registered_desc', 'registered_asc') THEN p.registeredAt END DESC"
+    )
+    Page<PopupStore> findByFilter(
             @Param("targetLocation") String targetLocation,
             @Param("type") String type,
             @Param("targetAgeGroup") String targetAgeGroup,
             @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("endDate") LocalDate endDate,
+            @Param("sorting") String sorting,
+            Pageable pageable
     );
+
+    @Query("SELECT p FROM PopupStore p " +
+            "WHERE p.popupUserSeq.id = :userSeq " +
+            "ORDER BY p.registeredAt DESC")
+    List<PopupStore> findByUserSeq(@Param("userSeq") Long userSeq);
+
+    @Query("SELECT p.id FROM PopupStore p " +
+            "ORDER BY p.id DESC LIMIT 1")
+    Long findLastSeq();
 
     @Modifying
     @Query("UPDATE PopupStore p " +
@@ -49,10 +68,14 @@ public interface PopupStoreJpaRepository extends JpaRepository<PopupStore, Long>
             @Param("targetAgeGroup") String targetAgeGroup,
             @Param("targetLocation") String targetLocation,
             @Param("title") String title,
-            @Param("wishArea") Integer wishArea,
+            @Param("wishArea") String wishArea,
             @Param("description") String description,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
+    @Query("SELECT p FROM PopupStore p " +
+            "ORDER BY p.registeredAt DESC " +
+            "LIMIT 10")
+    List<PopupStore> findByLimit();
 }

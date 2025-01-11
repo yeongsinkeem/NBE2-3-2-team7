@@ -2,7 +2,7 @@ package com.project.popupmarket.controller.userController;
 
 import com.project.popupmarket.dto.userDto.CreateAccessTokenRequest;
 import com.project.popupmarket.dto.userDto.CreateAccessTokenResponse;
-import com.project.popupmarket.service.userService.TokenService;
+import com.project.popupmarket.service.tokenService.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TokenApiController {
 
     private final TokenService tokenService;
+
 
     @PostMapping("/api/token")
     public ResponseEntity<CreateAccessTokenResponse> createNewAccessToken(@RequestBody CreateAccessTokenRequest request) {
