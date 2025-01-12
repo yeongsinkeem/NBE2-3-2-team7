@@ -5,7 +5,7 @@ import LandFilter from '../components/AppHome/LandFilter.vue';
 import PopupFilter from '../components/AppHome/PopupFilter.vue';
 import PopupCard from '../components/AppHome/PopupCard.vue';
 
-const rentalLand = [
+const land = [
 	{ title: '임대지 1', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', price: '100,000원', location: '서울', link: '/rental-place/1' },
 	{ title: '임대지 2', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', price: '200,000원', location: '부산', link: '/rental-place/2' },
 	{ title: '임대지 3', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', price: '200,000원', location: '부산', link: '/rental-place/2' },
@@ -17,7 +17,7 @@ const rentalLand = [
 	{ title: '임대지 9', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', price: '200,000원', location: '부산', link: '/rental-place/2' },
 ];
 
-const popupStore = [
+const popup = [
 	{ title: '팝업스토어 1', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', type: '아이돌', location: '대구', link: '/popup-store/1' },
 	{ title: '팝업스토어 2', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', type: '만화', location: '인천', link: '/popup-store/2' }
 ];
@@ -147,7 +147,7 @@ function slideImage() {
 				<h3 class="pl-8 mt-4 text-2xl">추천 임대지</h3>
 				<div class="relative rounded-xl overflow-auto my-4"><!-- Snap Point -->
 					<div id="place-box" class="relative w-full flex gap-6 snap-x list_scrollbar overflow-x-auto pb-6">
-						<LandCard v-for="(item, index) in rentalLand" :key="index" :image="item.image"
+						<LandCard v-for="(item, index) in land" :key="index" :image="item.image"
 							:title="item.title" :price="item.price" :location="item.location" :link="item.link" />
 					</div>
 				</div>
@@ -157,9 +157,8 @@ function slideImage() {
 			<div class="border-2 max-w-7xl mx-auto rounded-2xl ">
 				<h3 class="pl-8 mt-4 text-2xl">추천 팝업스토어</h3>
 				<div class="relative rounded-xl overflow-auto my-4"><!-- Snap Point -->
-					<!-- Contents -->
 					<div id="popup-box" class="relative w-full flex gap-6 snap-x list_scrollbar overflow-x-auto pb-6">
-						<PopupCard v-for="(item, index) in popupStore" :key="index" :image="item.image"
+						<PopupCard v-for="(item, index) in popup" :key="index" :image="item.image"
 							:title="item.title" :type="item.type" :location="item.location" :link="item.link" />
 					</div>
 				</div>
