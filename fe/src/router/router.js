@@ -7,10 +7,9 @@ const routes = [
 	{ path: '/land/:id', component: () => import('../views/LandView.vue') },
 	{ path: '/popup', component: () => import('../views/PopupList.vue') },
 	{ path: '/popup/:id', component: () => import('../views/PopupView.vue') },
-	// { path: '/payment', component: () => import('../views/AppPayment.vue') },
-	//   { path: '/user', component: () => import('../views/UserView.vue') },
-	//   { path: '/', component: () => import('../views/UserView.vue') },
-
+	{ path: '/payment', component: () => import('../views/AppPayment.vue') },
+	{ path: '/payment/success', component: () => import('../views/PaymentSuccess.vue') },
+	{ path: '/payment/failure', component: () => import('../views/PaymentFailure.vue') },
 ];
 
 const router = createRouter({
