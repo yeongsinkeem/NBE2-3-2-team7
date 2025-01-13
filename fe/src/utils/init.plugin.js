@@ -17,11 +17,12 @@ const getTomorrow = () => {
 	return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
 }
 
-export const initFlatpickr = (range) => {
+let calendarInstance = null;
 
-	if (!range) range = [];
-
-	flatpickr('#date-range', {
+export const initFlatpickr = (range = []) => {
+	if (calendarInstance) calendarInstance.destroy();
+	
+	calendarInstance = flatpickr('#date-range', {
 		mode: "range",
 		dateFormat: "Y-m-d",
 		minDate: getTomorrow(),
@@ -38,6 +39,7 @@ export const initFlatpickr = (range) => {
 			},
 		}
 	});
+	
 };
 
 export function initPriceSlider(minPrice, maxPrice, store) {

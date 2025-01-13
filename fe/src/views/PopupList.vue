@@ -6,8 +6,8 @@ import BasePaging from '../components/ItemList/BasePaging.vue';
 import PopupCard from '../components/ItemList/PopupCard.vue';
 
 const popup = [
-	{ title: '팝업스토어 1', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', type: '아이돌', location: '대구', link: '/popup-store/1', start: '2025-01-02', end: '2025-01-12' },
-	{ title: '팝업스토어 2', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', type: '만화', location: '인천', link: '/popup-store/2', start: '2025-01-04', end: '2025-01-14' }
+	{ title: '팝업스토어 1', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', type: '아이돌', location: '대구', link: '/popup/1', start: '2025-01-02', end: '2025-01-12' },
+	{ title: '팝업스토어 2', image: 'https://images.unsplash.com/photo-1604999565976-8913ad2ddb7c?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=320&amp;h=160&amp;q=80', type: '만화', location: '인천', link: '/popup/2', start: '2025-01-04', end: '2025-01-14' }
 ];
 
 
