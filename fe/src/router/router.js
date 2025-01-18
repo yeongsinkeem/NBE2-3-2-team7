@@ -10,6 +10,7 @@ const routes = [
 	{ path: '/payment', component: () => import('../views/AppPayment.vue') },
 	{ path: '/payment/success', component: () => import('../views/PaymentSuccess.vue') },
 	{ path: '/payment/failure', component: () => import('../views/PaymentFailure.vue') },
+	{ path: '/user', component: () => import('../views/User.vue') },
 ];
 
 const router = createRouter({
